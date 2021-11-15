@@ -259,8 +259,7 @@ setup_element_factory(SessionCore* core,
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audioencoder");
         }
     }
-    if (!error == NULL) 
-    {
+    if (!error == NULL) {
         session_core_finalize(core,PIPELINE_ERROR_EXIT,error);
     }
     pipe->webrtcbin =

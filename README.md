@@ -1,4 +1,9 @@
-# Thinkmay Streaming 
+# Thinkmay Streaming
+===================================
+.. image:: https://upload.wikimedia.org/wikipedia/commons/b/b9/Slack_Technologies_Logo.svg
+   :alt: OBS Studio Discord Server
+   :target: https://join.slack.com/t/thinkmayworkspace/shared_invite/zt-ywglslgj-fQb4Po4JagVaHbZ8wwiqpg
+
 
 # What is Thinkmay
 Thinkmay is a platform allows users to hire personal computer from the others.

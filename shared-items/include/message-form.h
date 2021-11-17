@@ -7,7 +7,7 @@
 #include <opcode.h>
 #include <module-code.h>
 
-typedef 				JsonObject				Message;
+typedef 		    JsonObject				Message;
 
 /// <summary>
 /// initialize message (json_object) 

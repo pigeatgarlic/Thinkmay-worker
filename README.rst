@@ -15,8 +15,9 @@ Thinkmay streaming is distributed uner HNU General Public License v2
 Quick Links:
 -----------
 - Website: https://www.thinkmay.net
-- Slack: https://join.slack.com/t/thinkmayworkspace/shared_invite/zt-ywglslgj-fQb4Po4JagVaHbZ8wwiqpg
-- Architecture document: https://miro.com/app/board/o9J_lTKComc=/?invite_link_id=202014558866
+- Slack (chat channel): https://join.slack.com/t/thinkmayworkspace/shared_invite/zt-ywglslgj-fQb4Po4JagVaHbZ8wwiqpg
+- Architecture document (miro): https://miro.com/app/board/o9J_lTKComc=/?invite_link_id=202014558866
+- Detailed document (notion): https://www.notion.so/invite/d8ab5a15ff6ca0f4df12c3e6b292456dfb9a83b9
 
 Build Requirement: 
 -----------

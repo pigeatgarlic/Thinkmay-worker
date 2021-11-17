@@ -1,4 +1,4 @@
-# Thinkmay Streaming
+Thinkmay Streaming
 ===================================
 .. image:: 	https://img.shields.io/github/license/pigeatgarlic/Thinkmay-worker
 
@@ -15,7 +15,8 @@ Thinkmay streaming is distributed uner HNU General Public License v2
 Quick Links:
 -----------
 - Website: https://www.thinkmay.net
--slack: https://join.slack.com/t/thinkmayworkspace/shared_invite/zt-ywglslgj-fQb4Po4JagVaHbZ8wwiqpg
+- Slack: https://join.slack.com/t/thinkmayworkspace/shared_invite/zt-ywglslgj-fQb4Po4JagVaHbZ8wwiqpg
+- Architecture document: https://miro.com/app/board/o9J_lTKComc=/?invite_link_id=202014558866
 
 Build Requirement: 
 -----------

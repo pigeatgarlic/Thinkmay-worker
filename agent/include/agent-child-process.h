@@ -33,7 +33,7 @@ ChildProcess*		create_new_child_process					(gchar* binary_name,
 																 gchar* parsed_command,
 																 ChildStdHandle func,
 																 ChildStateHandle handler,
-																 AgentObject* agent);
+																 AgentServer* agent);
 
 /// <summary>
 /// 
@@ -52,7 +52,7 @@ ChildProcess* 		get_available_file_transceiver				();
 /// 
 /// </summary>
 /// <param name="agent"></param>
-void				initialize_child_process_system				(AgentObject* agent);
+void				initialize_child_process_system				(AgentServer* agent);
 
 
 /// <summary>
@@ -62,7 +62,7 @@ void				initialize_child_process_system				(AgentObject* agent);
 /// </summary>
 /// <param name="buffer"></param>
 /// <param name="agent"></param>
-gboolean			get_current_child_process_state				(AgentObject* agent,
+gboolean			get_current_child_process_state				(AgentServer* agent,
 																 gint order);
 
 

@@ -2,7 +2,7 @@
 #include <agent-state.h>
 #include <agent-session-initializer.h>
 #include <agent-socket.h>
-#include <agent-object.h>
+#include <agent-server.h>
 #include <agent-state-open.h>
 #include <agent-state-on-session-off-remote.h>
 #include <agent-shell-session.h>
@@ -18,7 +18,7 @@
 #include <glib.h>
 
 static void
-on_session_session_terminate(AgentObject* agent)
+on_session_session_terminate(AgentServer* agent)
 {
     GFile* hdl = g_file_parse_name(SESSION_SLAVE_FILE);
     GError* error = NULL;
@@ -36,7 +36,7 @@ on_session_session_terminate(AgentObject* agent)
 }
 
 static void
-on_session_remote_control_disconnect(AgentObject* agent)
+on_session_remote_control_disconnect(AgentServer* agent)
 {
     // child process will be close automatically after state switch to off remote
     AgentState* off_remote_state = transition_to_off_remote_state();
@@ -44,7 +44,7 @@ on_session_remote_control_disconnect(AgentObject* agent)
 }
 
 static void
-on_session_send_message_to_host(AgentObject* agent,
+on_session_send_message_to_host(AgentServer* agent,
     gchar* message)
 {
     static gboolean initialized = FALSE;
@@ -82,13 +82,13 @@ on_session_send_message_to_host(AgentObject* agent,
 }
 
 static void
-on_session_on_shell_process_exit(AgentObject* agent,gint process_id)
+on_session_on_shell_process_exit(AgentServer* agent,gint process_id)
 {
     report_shell_session(agent, process_id);
 }
 
 static void
-on_session_session_core_exit(AgentObject* agent)
+on_session_session_core_exit(AgentServer* agent)
 {
     Message* message = 
         empty_message_init(AGENT_MODULE,HOST_MODULE,SESSION_CORE_EXIT);

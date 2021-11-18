@@ -84,7 +84,7 @@ on_file_compress_process_completed(ChildProcess* process)
 static void
 compressor_process_handle(ChildProcess* proc,
                     DWORD exit_code,
-                    AgentObject* agent)
+                    AgentServer* agent)
 {
     if(exit_code == STILL_ACTIVE){
         return;
@@ -99,14 +99,14 @@ compressor_process_handle(ChildProcess* proc,
 static void
 file_compress_output_handle(GBytes* data,
                             gint process_id,
-                            AgentObject* agent)
+                            AgentServer* agent)
 {
     return;
 }
 
 void
 start_compressor(FileCompressor* compressor, 
-                AgentObject* agent)
+                AgentServer* agent)
 {
 
     GString* string = g_string_new(" Compress-Archive ");

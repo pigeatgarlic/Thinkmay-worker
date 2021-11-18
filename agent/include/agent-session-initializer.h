@@ -3,7 +3,7 @@
 #define __AGENT_SESSION_INITIALIZER_H__ 
 
 #include <glib.h>
-#include <agent-object.h>
+#include <agent-server.h>
 #include <agent-type.h>
 
 #include <Windows.h>
@@ -17,7 +17,7 @@
 /// <param name="self"></param>
 /// <param name="buffer"></param>
 /// <returns></returns>
-gboolean			send_message_to_core							(AgentObject* self,
+gboolean			send_message_to_core							(AgentServer* self,
 																	 gchar* buffer);
 /// <summary>
 /// (ATOMIC function)
@@ -27,7 +27,7 @@ gboolean			send_message_to_core							(AgentObject* self,
 /// <param name="self"></param>
 /// <param name="buffer"></param>
 /// <returns></returns>
-gboolean			send_message_to_loader							(AgentObject* self,
+gboolean			send_message_to_loader							(AgentServer* self,
 																	 gchar* buffer);
 
 /// <summary>
@@ -36,7 +36,7 @@ gboolean			send_message_to_loader							(AgentObject* self,
 /// </summary>
 /// <param name="object"></param>
 /// <returns></returns>
-gboolean			session_initialize   							(AgentObject* object);
+gboolean			session_initialize   							(AgentServer* object);
 
 /// <summary>
 /// terminate session, included termination of two child process and cleaning some garbagge
@@ -44,7 +44,7 @@ gboolean			session_initialize   							(AgentObject* object);
 /// </summary>
 /// <param name="object"></param>
 /// <returns></returns>
-gboolean 			session_terminate   							(AgentObject* object);
+gboolean 			session_terminate   							(AgentServer* object);
 
 /// <summary>
 /// disconnect remote control with user, unlike session terminate,
@@ -52,27 +52,27 @@ gboolean 			session_terminate   							(AgentObject* object);
 /// </summary>
 /// <param name="object"></param>
 /// <returns></returns>
-gboolean			remote_control_disconnect						(AgentObject* object);
+gboolean			remote_control_disconnect						(AgentServer* object);
 
 /// <summary>
 /// initialize remote control based on session structure in agent_object
 /// </summary>
 /// <param name="object"></param>
 /// <returns></returns>
-gboolean			remote_control_reconnect						(AgentObject* object);
+gboolean			remote_control_reconnect						(AgentServer* object);
 
 /// <summary>
 /// 
 /// </summary>
 /// <param name="agent"></param>
-void				intialize_remote_session_service				(AgentObject* agent);
+void				intialize_remote_session_service				(AgentServer* agent);
 
 /// <summary>
 /// 
 /// </summary>
 /// <param name="agent"></param>
 /// <param name="data"></param>
-void				setup_session									(AgentObject* agent, 
+void				setup_session									(AgentServer* agent, 
 																	 gchar* data);
 																	 
 #endif

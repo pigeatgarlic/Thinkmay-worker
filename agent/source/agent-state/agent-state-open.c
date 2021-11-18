@@ -13,7 +13,7 @@
 #include <logging.h>
 
 static void
-on_open_session_initialize(AgentObject* agent)
+on_open_session_initialize(AgentServer* agent)
 {
     AgentState* open_state = transition_to_on_session_state();
     agent_set_state(agent, open_state);
@@ -22,7 +22,7 @@ on_open_session_initialize(AgentObject* agent)
 
 
 static void
-open_state_send_message_to_host(AgentObject* agent,
+open_state_send_message_to_host(AgentServer* agent,
     gchar* message)
 {
     static gboolean initialized = FALSE;
@@ -67,7 +67,7 @@ open_get_state(void)
 
 
 static void
-open_on_shell_process_exit(AgentObject* agent, 
+open_on_shell_process_exit(AgentServer* agent, 
                            gint process_id)
 {
     report_shell_session(agent, process_id);

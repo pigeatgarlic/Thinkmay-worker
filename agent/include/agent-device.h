@@ -21,7 +21,7 @@
 /// </summary>
 /// <param name="data"></param>
 /// <returns></returns>
-gpointer				update_device					(AgentObject* data);
+gpointer				update_device					(AgentServer* data);
 
 
 

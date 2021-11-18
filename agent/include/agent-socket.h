@@ -6,7 +6,7 @@
 #include <glib.h>
 #include <libsoup/soup.h>
 #include <json-glib-1.0/json-glib/json-glib.h>
-#include <agent-object.h>
+#include <agent-server.h>
 
 #include <Windows.h>
 
@@ -30,7 +30,7 @@
 void									on_server_message					(SoupWebsocketConnection* conn,
     																		 SoupWebsocketDataType type,
     																		 GBytes* message,
-   																			 AgentObject* user_data);
+   																			 AgentServer* user_data);
 
 /// <summary>
 /// register slave device with host, 
@@ -39,7 +39,7 @@ void									on_server_message					(SoupWebsocketConnection* conn,
 /// </summary>
 /// <param name="self"></param>
 /// <returns></returns>
-gboolean                                register_with_host                  (AgentObject* self);
+gboolean                                register_with_host                  (AgentServer* self);
 
 
 /// <summary>
@@ -49,7 +49,7 @@ gboolean                                register_with_host                  (Age
 /// </summary>
 /// <param name="self"></param>
 /// <param name="message"></param>
-void 									send_message_to_host				(AgentObject* self,
+void 									send_message_to_host				(AgentServer* self,
                                                                              gchar* data);
 
 /// <summary>
@@ -58,7 +58,7 @@ void 									send_message_to_host				(AgentObject* self,
 /// wrap soup_websocket_connect_async function
 /// </summary>
 /// <param name="self"></param>
-void									connect_to_host_async				(AgentObject* self);
+void									connect_to_host_async				(AgentServer* self);
 
 
 
@@ -72,7 +72,7 @@ void									connect_to_host_async				(AgentObject* self);
 /// </summary>
 /// <param name="data"></param>
 /// <returns></returns>
-gpointer                                update_device_with_host             (AgentObject* data);
+gpointer                                update_device_with_host             (AgentServer* data);
 
 
 /// <summary>
@@ -80,7 +80,7 @@ gpointer                                update_device_with_host             (Age
 /// </summary>
 /// <param name="host_url"></param>
 /// <returns>Socket correspond to host url</returns>
-Socket*                                 initialize_socket                   (AgentObject* agent);
+Socket*                                 initialize_socket                   (AgentServer* agent);
 
 /// <summary>
 /// close socket, this should be used after agent termination signal is send

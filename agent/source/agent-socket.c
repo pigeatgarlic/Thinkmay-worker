@@ -5,7 +5,7 @@
 #include <agent-device.h>
 #include <agent-state-disconnected.h>
 #include <agent-state-open.h>
-#include <agent-object.h>
+#include <agent-server.h>
 
 #include <error-code.h>
 #include <logging.h>
@@ -35,7 +35,7 @@ static Socket socket_declare = {0};
 
 
 void 
-send_message_to_host(AgentObject* object,
+send_message_to_host(AgentServer* object,
                      gchar* message)
 {
     Socket* socket = agent_get_socket(object);
@@ -76,7 +76,7 @@ socket_close(Socket* socket)
 void
 on_server_error(SoupWebsocketConnection* conn,
     GError* error,
-    AgentObject* agent)
+    AgentServer* agent)
 {
     gchar* text = error->message;
     write_to_log_file(AGENT_NETWORK_LOG,text);
@@ -100,7 +100,7 @@ on_server_error(SoupWebsocketConnection* conn,
 /// <param name=""></param>
 void
 on_server_closed(SoupWebsocketConnection* conn,
-    AgentObject* agent)
+    AgentServer* agent)
 {
     /*close websocket connection*/
     Socket* socket = agent_get_socket(agent);
@@ -123,7 +123,7 @@ on_server_closed(SoupWebsocketConnection* conn,
 void
 on_server_connected(SoupSession* session,
     GAsyncResult* res,
-    AgentObject* agent)
+    AgentServer* agent)
 {
     GError* error = NULL;
     Socket* socket = agent_get_socket(agent);
@@ -159,7 +159,7 @@ on_server_connected(SoupSession* session,
 
 
 void
-connect_to_host_async(AgentObject* self)
+connect_to_host_async(AgentServer* self)
 {
     Socket* socket = 
         agent_get_socket(self);
@@ -179,7 +179,7 @@ void
 on_server_message(SoupWebsocketConnection* conn,
                     SoupWebsocketDataType type,
                     GBytes* message,
-                    AgentObject* self)
+                    AgentServer* self)
 {
     gchar* text = "ERROR";
     switch (type) 
@@ -207,7 +207,7 @@ on_server_message(SoupWebsocketConnection* conn,
 
 
 gboolean
-register_with_host(AgentObject* agent)
+register_with_host(AgentServer* agent)
 {
     JsonParser* parser = json_parser_new();
 
@@ -248,7 +248,7 @@ socket_get_connection(Socket* socket)
 }
 
 gchar*
-socket_get_host_url(AgentObject* agent)
+socket_get_host_url(AgentServer* agent)
 {
     JsonParser* parser = json_parser_new();
 
@@ -280,7 +280,7 @@ agent_logger(SoupLogger* logger,
 
 
 Socket*
-initialize_socket(AgentObject* agent)
+initialize_socket(AgentServer* agent)
 {
     const gchar* https_aliases[] = { "wss", NULL };
     

@@ -29,7 +29,7 @@ typedef struct _DeviceInformation 	DeviceInformation;
 /// <summary>
 /// agent object is an object use to abstract agent module
 /// </summary>
-typedef struct _AgentObject			AgentObject;
+typedef struct _AgentServer			AgentServer;
 
 /// <summary>
 /// Child pipe contain standard i/o pipe of child process of agent
@@ -85,7 +85,7 @@ typedef		   JsonObject			Message;
 /// </summary>
 typedef void  (*ChildStdHandle)    (GBytes* buffer,
                                      gint process_id,
-                                     AgentObject* agent);
+                                     AgentServer* agent);
 /// <summary>
 /// child state handle function is setteled inside a looped thread 
 /// and responsible for manage state of child process thread
@@ -93,7 +93,7 @@ typedef void  (*ChildStdHandle)    (GBytes* buffer,
 /// </summary>
 typedef void  (*ChildStateHandle)  (ChildProcess* ProcessID,
                                     DWORD ProcessState,
-                                    AgentObject* agent);
+                                    AgentServer* agent);
 
 
 

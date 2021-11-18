@@ -95,7 +95,7 @@ on_file_transceive_process_completed(ChildProcess* process)
 static void
 file_transceiver_output_handle(GBytes* data,
                             gint process_id,
-                            AgentObject* agent)
+                            AgentServer* agent)
 {
     return;
 }
@@ -103,7 +103,7 @@ file_transceiver_output_handle(GBytes* data,
 static void
 transceiver_process_handle(ChildProcess* proc,
                     DWORD exit_code,
-                    AgentObject* agent)
+                    AgentServer* agent)
 {
     if(exit_code == STILL_ACTIVE){
         return;
@@ -117,7 +117,7 @@ transceiver_process_handle(ChildProcess* proc,
 
 void
 start_transceive_compressed_file(FileTransceiver* transceiver, 
-                              AgentObject* agent)
+                              AgentServer* agent)
 {
 
     GString* string = g_string_new("--sessionid ");

@@ -19,7 +19,7 @@
 /// </summary>
 /// <param name="self"></param>
 /// <returns></returns>
-void											agent_connect_to_host				(AgentObject* self);
+void											agent_connect_to_host				(AgentServer* self);
 
 
 /// <summary>
@@ -27,7 +27,7 @@ void											agent_connect_to_host				(AgentObject* self);
 /// </summary>
 /// <param name="self"></param>
 /// <returns></returns>
-void											agent_disconnect_host				(AgentObject* self);
+void											agent_disconnect_host				(AgentServer* self);
 
 
 /// <summary>
@@ -36,7 +36,7 @@ void											agent_disconnect_host				(AgentObject* self);
 /// </summary>
 /// <param name="self"></param>
 /// <returns></returns>
-void											agent_session_initialize			(AgentObject* self);
+void											agent_session_initialize			(AgentServer* self);
 
 
 /// <summary>
@@ -45,7 +45,7 @@ void											agent_session_initialize			(AgentObject* self);
 /// </summary>
 /// <param name="self"></param>
 /// <returns></returns>
-void											agent_session_terminate				(AgentObject* self);
+void											agent_session_terminate				(AgentServer* self);
 
 /// <summary>
 /// agent remote control disconnect function, 
@@ -53,7 +53,7 @@ void											agent_session_terminate				(AgentObject* self);
 /// </summary>
 /// <param name="self"></param>
 /// <returns></returns>
-void											agent_remote_control_disconnect		(AgentObject* self);
+void											agent_remote_control_disconnect		(AgentServer* self);
 
 /// <summary>
 /// agent remote control reconnect function,
@@ -61,7 +61,7 @@ void											agent_remote_control_disconnect		(AgentObject* self);
 /// </summary>
 /// <param name="self"></param>
 /// <returns></returns>
-void											agent_remote_control_reconnect		(AgentObject* self);
+void											agent_remote_control_reconnect		(AgentServer* self);
 
 
 
@@ -70,7 +70,7 @@ void											agent_remote_control_reconnect		(AgentObject* self);
 /// if in connection, agent will report to host and cmd process termination event will be recorded
 /// </summary>
 /// <param name="self"></param>
-void         									agent_on_shell_process_terminate	(AgentObject* self, 
+void         									agent_on_shell_process_terminate	(AgentServer* self, 
 																					 gint process_id);
 
 /// <summary>
@@ -78,7 +78,7 @@ void         									agent_on_shell_process_terminate	(AgentObject* self,
 /// close websocket connection and close agent process
 /// </summary>
 /// <param name="object"></param>
-void											agent_finalize						(AgentObject* object);
+void											agent_finalize						(AgentServer* object);
 /// <summary>
 /// Create new agent object based on information of host
 /// this initialize step will include allocate heap and connect to host
@@ -86,20 +86,20 @@ void											agent_finalize						(AgentObject* object);
 /// <param name="Host_URL"></param>
 /// <param name="Host_ID"></param>
 /// <returns></returns>
-AgentObject*									agent_new							();
+AgentServer*									agent_new							();
 
 /// <summary>
 /// handle message from host
 /// </summary>
 /// <param name="self"></param>
-void											handle_host_connection				(AgentObject* self);
+void											handle_host_connection				(AgentServer* self);
 
 /// <summary>
 /// send message to other module
 /// </summary>
 /// <param name="self"></param>
 /// <param name="message">message to send</param>
-void											agent_send_message					(AgentObject* self, Message* message);
+void											agent_send_message					(AgentServer* self, Message* message);
 
 /// <summary>
 /// send message to arbitrary device in system
@@ -107,14 +107,14 @@ void											agent_send_message					(AgentObject* self, Message* message);
 /// <param name="self"></param>
 /// <param name="message"></param>
 /// <returns></returns>
-void											agent_send_message_to_host			(AgentObject* self,
+void											agent_send_message_to_host			(AgentServer* self,
 																					gchar* message);
 /// <summary>
 /// 
 /// </summary>
 /// <param name="self"></param>
 /// <param name="message"></param>
-void											agent_send_message_to_session_core	(AgentObject* self,
+void											agent_send_message_to_session_core	(AgentServer* self,
 																					 gchar* message);
 
 
@@ -130,7 +130,7 @@ void											agent_start_file_transfer			(gchar* server_commmand);
 /// </summary>
 /// <param name="self"></param>
 /// <param name="message"></param>
-void											agent_send_message_to_session_loader(AgentObject* self,
+void											agent_send_message_to_session_loader(AgentServer* self,
 																					 gchar* message);
 
 /// <summary>
@@ -138,7 +138,7 @@ void											agent_send_message_to_session_loader(AgentObject* self,
 /// only invoke when agent in attemp to reconnect state
 /// </summary>
 /// <param name="self"></param>
-void											agent_register_with_host			(AgentObject* self);
+void											agent_register_with_host			(AgentServer* self);
 
 
 
@@ -148,7 +148,7 @@ void											agent_register_with_host			(AgentObject* self);
 /// otherwise just ignored 
 /// </summary>
 /// <param name="self"></param>
-void											agent_on_session_core_exit		(AgentObject* self);
+void											agent_on_session_core_exit		(AgentServer* self);
 
 
 /// <summary>
@@ -157,43 +157,43 @@ void											agent_on_session_core_exit		(AgentObject* self);
 /// </summary>
 /// <param name="self"></param>
 /// <param name="message">a short description about error</param>
-void											agent_report_error					(AgentObject* self,
+void											agent_report_error					(AgentServer* self,
 				   																	 gchar* message);
 
 
 /*get-set function for agent object*/
-Socket*											agent_get_socket					(AgentObject* self);
+Socket*											agent_get_socket					(AgentServer* self);
 
 
 
-AgentState*										agent_get_state						(AgentObject* self);
+AgentState*										agent_get_state						(AgentServer* self);
 
-void											agent_set_state						(AgentObject* self,
+void											agent_set_state						(AgentServer* self,
 																					 AgentState* state);
 
-void											agent_set_main_loop					(AgentObject* agent,
+void											agent_set_main_loop					(AgentServer* agent,
 																					 GMainLoop* loop);
 
 
-gchar*											agent_get_current_state_string		(AgentObject* self);
+gchar*											agent_get_current_state_string		(AgentServer* self);
 
-ChildProcess*									agent_get_child_process				(AgentObject* self, 
+ChildProcess*									agent_get_child_process				(AgentServer* self, 
 																					 gint position);
 
-void											agent_set_child_process				(AgentObject* self,
+void											agent_set_child_process				(AgentServer* self,
 																				     gint postion,
 																					 ChildProcess* process);
 
-void											agent_set_file_transfer_service		(AgentObject* self,
+void											agent_set_file_transfer_service		(AgentServer* self,
 																					 gint position,
 																					 FileTransferSession* session);
 
-RemoteSession*									agent_get_remote_session			(AgentObject* self);
+RemoteSession*									agent_get_remote_session			(AgentServer* self);
 
-void											agent_set_remote_session			(AgentObject* self, 
+void											agent_set_remote_session			(AgentServer* self, 
 																					 RemoteSession* session);
 
-GMainLoop*										agent_get_main_loop					(AgentObject* self);
+GMainLoop*										agent_get_main_loop					(AgentServer* self);
 /*END get-set function for agent object*/
 
 

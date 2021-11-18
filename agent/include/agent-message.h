@@ -20,7 +20,7 @@
 /// <param name="type"></param>
 /// <param name="message"></param>
 /// <param name="self"></param>
-void				on_agent_message            (AgentObject* self,
+void				on_agent_message            (AgentServer* self,
                                                 gchar* data);
 
 /// <summary>
@@ -28,6 +28,6 @@ void				on_agent_message            (AgentObject* self,
 /// </summary>
 /// <param name="self"></param>
 /// <param name="message"></param>
-void				send_message                (AgentObject* self,
+void				send_message                (AgentServer* self,
                                                  Message* message);
 #endif

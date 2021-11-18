@@ -35,6 +35,6 @@ FileCompressor* init_file_compressor                (FileTransferSession* sessio
 /// <param name="compressor"></param>
 /// <param name="agent"></param>
 void            start_compressor                    (FileCompressor* compressor, 
-                                                     AgentObject* agent);
+                                                     AgentServer* agent);
 
 #endif

@@ -1,5 +1,5 @@
 #include <agent-state.h>
-#include <agent-object.h>
+#include <agent-server.h>
 #include <agent-type.h>
 #include <glib.h>
 
@@ -8,64 +8,64 @@
 
 
 static void  
-default_session_initialize  ( AgentObject* agent)
+default_session_initialize  ( AgentServer* agent)
 {
     agent_report_error(agent,AGENT_STATE_CONFLICT);
 }
 
 static void
-default_session_terminate   (AgentObject* agent)
+default_session_terminate   (AgentServer* agent)
 {
     agent_report_error(agent,AGENT_STATE_CONFLICT);
 }                             
 
 static void
-default_remote_control_disconnect( AgentObject* agent)
+default_remote_control_disconnect( AgentServer* agent)
 {
     agent_report_error(agent,AGENT_STATE_CONFLICT);
 }
 
 static void
-default_remote_control_reconnect(AgentObject* agent)
+default_remote_control_reconnect(AgentServer* agent)
 {
     agent_report_error(agent,AGENT_STATE_CONFLICT);
 }
 
 
 static void
-default_send_message_to_host(AgentObject* agent,
+default_send_message_to_host(AgentServer* agent,
                              Message* message)
 {
     agent_report_error(agent,AGENT_STATE_CONFLICT);
 }
 
 static void
-default_send_message_to_local_module(AgentObject* agent,
+default_send_message_to_local_module(AgentServer* agent,
                                      Message* message)
 {
     agent_report_error(agent,AGENT_STATE_CONFLICT);
 }
 
 static void
-default_connect_to_host(AgentObject* agent)
+default_connect_to_host(AgentServer* agent)
 {
     agent_report_error(agent,AGENT_STATE_CONFLICT);
 }
 
 static void
-default_register_to_host(AgentObject* agent)
+default_register_to_host(AgentServer* agent)
 {
     agent_report_error(agent,AGENT_STATE_CONFLICT);
 }
 
 static void
-default_on_session_core_exit(AgentObject* agent)
+default_on_session_core_exit(AgentServer* agent)
 {
     return;
 }
 
 static void
-default_on_shell_process_exit(AgentObject* agent)
+default_on_shell_process_exit(AgentServer* agent)
 {
     return;
 }

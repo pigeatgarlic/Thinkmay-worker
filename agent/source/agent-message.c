@@ -1,7 +1,7 @@
 #include <agent-message.h>
 #include <agent-socket.h>
 #include <agent-session-initializer.h>
-#include <agent-object.h>
+#include <agent-server.h>
 #include <agent-type.h>
 #include <agent-state-open.h>
 #include <agent-state.h>
@@ -20,7 +20,7 @@
 
 
 void
-send_message(AgentObject* self,
+send_message(AgentServer* self,
              Message* message)
 {
 	Module to = json_object_get_int_member(message, "To");
@@ -44,14 +44,14 @@ send_message(AgentObject* self,
 }
 
 static void
-setup_slave_device(AgentObject* agent, gchar* slave)
+setup_slave_device(AgentServer* agent, gchar* slave)
 {
 	AgentState* open_state = transition_to_on_open_state();
 	agent_set_state(agent, open_state);	
 }
 
 void
-agent_reset_qoe(AgentObject* agent, JsonObject* qoe)
+agent_reset_qoe(AgentServer* agent, JsonObject* qoe)
 {
 	JsonParser* parser;
 	GError* error = NULL;
@@ -94,7 +94,7 @@ agent_reset_qoe(AgentObject* agent, JsonObject* qoe)
 
 
 void
-on_agent_message(AgentObject* agent,
+on_agent_message(AgentServer* agent,
 				 gchar* data)
 {
 	GError* error = NULL;

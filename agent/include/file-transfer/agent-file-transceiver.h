@@ -10,7 +10,7 @@
 #ifndef __AGENT_FILE_TRANSCEIVER_H__
 #define __AGENT_FILE_TRANSCEIVER_H__
 #include <agent-type.h>
-#include <agent-object.h>
+#include <agent-server.h>
 
 /// <summary>
 /// 

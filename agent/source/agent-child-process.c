@@ -1,6 +1,6 @@
 #include <agent-child-process.h>
 #include <agent-type.h>
-#include <agent-object.h>
+#include <agent-server.h>
 #include <agent-state-on-session-off-remote.h>
 
 
@@ -40,7 +40,7 @@ struct _ChildPipe
 
 struct _ChildProcess
 {
-    AgentObject* agent;
+    AgentServer* agent;
     gint process_id;
 
 #ifdef G_OS_WIN32
@@ -57,7 +57,7 @@ struct _ChildProcess
 static ChildProcess process_pool[MAX_CHILD_PROCESS] = {0};
 
 void
-initialize_child_process_system(AgentObject* agent)
+initialize_child_process_system(AgentServer* agent)
 {
     memset(&process_pool,0,sizeof(process_pool));
     for(gint i = 0; i < MAX_CHILD_PROCESS;i++)
@@ -138,7 +138,7 @@ handle_child_process_state(gpointer data)
 
 static ChildPipe*
 initialize_process_handle(ChildProcess* self,
-                          AgentObject* agent)
+                          AgentServer* agent)
 {
     static ChildPipe hdl;
 
@@ -194,7 +194,7 @@ create_new_child_process(gchar* process_name,
                         gchar* parsed_command,
                         ChildStdHandle func,
                         ChildStateHandle handler,
-                        AgentObject* agent)
+                        AgentServer* agent)
 {
     ChildProcess* child_process = &process_pool[process_id];
     child_process->agent = agent;
@@ -256,7 +256,7 @@ create_new_child_process(gchar* process_name,
  
 
 gboolean 				
-get_current_child_process_state(AgentObject* agent,
+get_current_child_process_state(AgentServer* agent,
 								gint order)
 {
     ChildProcess* child_process = agent_get_child_process(agent, order);

@@ -12,7 +12,7 @@
 
 
 #include <agent-type.h>
-#include <agent-object.h>
+#include <agent-server.h>
 
 
 /// <summary>
@@ -40,7 +40,7 @@ FileTransferSession*    setup_file_transfer_session             (gchar* server_c
 /// 
 /// </summary>
 /// <param name="agent"></param>
-void             initialize_file_transfer_service               (AgentObject* agent);
+void             initialize_file_transfer_service               (AgentServer* agent);
 
 
 /// <summary>

@@ -2,7 +2,7 @@
 #include <agent-state.h>
 #include <glib.h>
 #include <agent-socket.h>
-#include <agent-object.h>
+#include <agent-server.h>
 
 #include <state-indicator.h>
 #include <logging.h>
@@ -15,7 +15,7 @@
 
 
 static void
-disconnected_connect_to_host(AgentObject* agent)
+disconnected_connect_to_host(AgentServer* agent)
 {
     //attemp to connect to host until connection return successfully
     while(TRUE)
@@ -32,13 +32,13 @@ disconnected_connect_to_host(AgentObject* agent)
 
 
 static void
-disconnected_register_with_host(AgentObject* agent)
+disconnected_register_with_host(AgentServer* agent)
 {
     register_with_host(agent);
 }
 
 static void
-disconnected_send_message_to_host(AgentObject* agent, 
+disconnected_send_message_to_host(AgentServer* agent, 
                                   char* message)
 {
     GError* error = NULL;

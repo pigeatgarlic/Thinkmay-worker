@@ -18,7 +18,7 @@
 #include <general-constant.h>
 #include <message-form.h>
 #include <error-code.h>
-#include <agent-object.h>
+#include <agent-server.h>
 #include <child-process-constant.h>
 #include <child-process-resources-assign.h>
 
@@ -98,7 +98,7 @@ get_shell_session(gint process_id)
 void
 shell_output_handle(GBytes* data,
     gint process_id,
-    AgentObject* agent)
+    AgentServer* agent)
 {
     return;
 }
@@ -107,7 +107,7 @@ shell_output_handle(GBytes* data,
 void
 shell_process_handle(ChildProcess* proc,
                     DWORD exit_code,
-                    AgentObject* agent)
+                    AgentServer* agent)
 {
     if(exit_code == STILL_ACTIVE)
     {
@@ -124,7 +124,7 @@ shell_process_handle(ChildProcess* proc,
 
 
 static void
-create_new_shell_process(AgentObject* agent, 
+create_new_shell_process(AgentServer* agent, 
                          ShellSession* session)
 {
     GString* string = g_string_new(session->script_file);
@@ -143,7 +143,7 @@ create_new_shell_process(AgentObject* agent,
 }
 
 static void 
-write_to_script_file(AgentObject* agent, ShellSession* session)
+write_to_script_file(AgentServer* agent, ShellSession* session)
 {
     GFile* file = g_file_parse_name(session->script_file);
 
@@ -170,7 +170,7 @@ static ShellSessionModel model[10];
 
 
 void
-initialize_shell_session(AgentObject* agent,
+initialize_shell_session(AgentServer* agent,
                          gchar* data_string)
 {
     ShellSession* session;
@@ -240,14 +240,15 @@ character_remover(gchar** string, gchar* character)
 }
 
 void
-report_shell_session(AgentObject* agent,
+report_shell_session(AgentServer* agent,
                     gint process_id)
 {
     gchar* script = shell_session_get_script(process_id);
     gchar* output = shell_session_get_output(process_id);
     gint id =       shell_session_get_id(process_id);
     gint model =    shell_session_get_model(process_id);
-    if(script == NULL || output == NULL) { agent_report_error(agent, "fail to get script output"); return; }
+    if(script == NULL || output == NULL) 
+    { agent_report_error(agent, "fail to get script output"); return; }
 
     gchar* temp = malloc(strlen(output));
     memcpy(temp,output+3,strlen(output));
@@ -282,12 +283,7 @@ report_shell_session(AgentObject* agent,
     gchar* parammeter = "";
     soup_message_set_request (msg, "application/json",
             SOUP_MEMORY_COPY, script, strlen (script));
-        
 
     status = soup_session_send_message (session, msg);
-
-    if(status != 200)
-    {
-        agent_report_error(agent, "Unable to update script output");
-    }
+    if(status != 200) { agent_report_error(agent, "Unable to update script output"); }
 }

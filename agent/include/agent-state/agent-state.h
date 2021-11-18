@@ -5,27 +5,27 @@
 
 
 
-typedef void            (*SessionTerminate)             (AgentObject* agent);
+typedef void            (*SessionTerminate)             (AgentServer* agent);
 
-typedef void            (*SessionInitialize)            (AgentObject* agent);
+typedef void            (*SessionInitialize)            (AgentServer* agent);
 
-typedef void            (*RemoteControlDisconnect)      (AgentObject* agent);
+typedef void            (*RemoteControlDisconnect)      (AgentServer* agent);
 
-typedef void            (*RemoteControlReconnect)       (AgentObject* agent);
+typedef void            (*RemoteControlReconnect)       (AgentServer* agent);
 
-typedef void            (*SendMessageToHost)            (AgentObject* agent, gchar* message);
+typedef void            (*SendMessageToHost)            (AgentServer* agent, gchar* message);
 
-typedef void            (*SendMessageToSessionCore)     (AgentObject* agent,gchar* message);
+typedef void            (*SendMessageToSessionCore)     (AgentServer* agent,gchar* message);
 
-typedef void            (*SendMessageToSessionLoader)   (AgentObject* agent, gchar* message);
+typedef void            (*SendMessageToSessionLoader)   (AgentServer* agent, gchar* message);
 
-typedef void            (*ConnectToHost)                (AgentObject* agent);
+typedef void            (*ConnectToHost)                (AgentServer* agent);
 
-typedef void            (*RegisterToHost)               ( AgentObject* agent);
+typedef void            (*RegisterToHost)               ( AgentServer* agent);
 
-typedef void            (*OnSessionCoreExit)            (AgentObject* agent);
+typedef void            (*OnSessionCoreExit)            (AgentServer* agent);
 
-typedef void            (*OnShellSessionExit)            (AgentObject* agent, 
+typedef void            (*OnShellSessionExit)            (AgentServer* agent, 
                                                           gint process_id);
 
 typedef gchar*          (*GetCurrentState)              (void);

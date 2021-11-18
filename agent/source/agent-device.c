@@ -1,5 +1,5 @@
 #include <agent-device.h>
-#include <agent-object.h>
+#include <agent-server.h>
 #include <agent-message.h>
 
 #include <logging.h>

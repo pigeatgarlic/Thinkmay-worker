@@ -11,7 +11,7 @@
 #define __AGENT_SHELL_SESSION_H__
 
 #include <glib.h>
-#include <agent-object.h>
+#include <agent-server.h>
 
 
 #include <Windows.h>
@@ -39,7 +39,7 @@ gchar*				shell_session_get_script					(gint process_id);
 /// 
 /// <param name="agent"></param>
 /// <param name="data_string"></param>
-void				initialize_shell_session					(AgentObject* agent,
+void				initialize_shell_session					(AgentServer* agent,
                     										     gchar* data_string);
 
 /// <summary>
@@ -61,7 +61,7 @@ gint				shell_session_get_model						(gint process_id);
 /// </summary>
 /// <param name="agent"></param>
 /// <param name="process_id"></param>
-void				report_shell_session						(AgentObject* agent,
+void				report_shell_session						(AgentServer* agent,
                     											 gint process_id);
 
 #endif

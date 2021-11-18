@@ -14,7 +14,7 @@
 #include <agent-type.h>
 
 #include <message-form.h>
-#include <agent-object.h>
+#include <agent-server.h>
 
 #include <child-process-constant.h>
 
@@ -42,13 +42,13 @@ struct _FileTransferSession
 
     gboolean completed;
 
-    AgentObject* agent;
+    AgentServer* agent;
 };
 
 static FileTransferSession session_pool[MAX_FILE_TRANSFER_INSTANCE] = {0};
 
 void
-initialize_file_transfer_service(AgentObject* agent)
+initialize_file_transfer_service(AgentServer* agent)
 {
     init_file_compressor_pool();
     init_file_transceiver_pool();

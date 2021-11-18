@@ -16,7 +16,7 @@
 
 
 static void
-off_remote_session_terminate(AgentObject* agent)
+off_remote_session_terminate(AgentServer* agent)
 {
     GFile* hdl = g_file_parse_name(SESSION_SLAVE_FILE);
     GError* error = NULL;
@@ -35,7 +35,7 @@ off_remote_session_terminate(AgentObject* agent)
 
 
 static void
-off_remote_send_message_to_host(AgentObject* agent,
+off_remote_send_message_to_host(AgentServer* agent,
     gchar* message)
 {
     GError* error = NULL;
@@ -73,7 +73,7 @@ off_remote_send_message_to_host(AgentObject* agent,
 
 
 static void
-off_remote_on_shell_process_exit(AgentObject* agent, 
+off_remote_on_shell_process_exit(AgentServer* agent, 
                                  gint process_id)
 {
     report_shell_session(agent, process_id);
@@ -81,7 +81,7 @@ off_remote_on_shell_process_exit(AgentObject* agent,
 
 
 static void
-off_remote_remote_control_reconnect(AgentObject* agent)
+off_remote_remote_control_reconnect(AgentServer* agent)
 {
     AgentState* on_session = transition_to_on_session_state();
     agent_set_state(agent, on_session);

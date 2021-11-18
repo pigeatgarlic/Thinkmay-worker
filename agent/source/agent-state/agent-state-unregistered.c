@@ -12,19 +12,19 @@
 #include <opcode.h>
 
 static void
-unregistered_connect_to_host(AgentObject* agent)
+unregistered_connect_to_host(AgentServer* agent)
 {
     connect_to_host_async(agent);
 }
 
 static void
-unregistered_register_with_host(AgentObject* agent)
+unregistered_register_with_host(AgentServer* agent)
 {
     register_with_host(agent);
 }
 
 static void
-unregistered_send_message_to_host(AgentObject* agent, char* message)
+unregistered_send_message_to_host(AgentServer* agent, char* message)
 {
     GError* error = NULL;
     JsonParser* parser = json_parser_new();

@@ -28,7 +28,7 @@ struct _RemoteSession
 static RemoteSession remote_session_singleton;
 
 void
-intialize_remote_session_service(AgentObject* agent)
+intialize_remote_session_service(AgentServer* agent)
 {
     agent_set_remote_session(agent, &remote_session_singleton);
 }
@@ -37,7 +37,7 @@ intialize_remote_session_service(AgentObject* agent)
 static void
 handler_session_core_state_function(ChildProcess* proc,
                                     DWORD exit_code, 
-                                    AgentObject* agent)
+                                    AgentServer* agent)
 {
     /*
     *if child process terminated is session core
@@ -68,7 +68,7 @@ handler_session_core_state_function(ChildProcess* proc,
 static void
 handle_session_core_function(GBytes* buffer,
     gint process_id,
-    AgentObject* agent)
+    AgentServer* agent)
 {
     gchar* message = g_bytes_get_data(buffer, NULL);
     on_agent_message(agent, message);
@@ -76,7 +76,7 @@ handle_session_core_function(GBytes* buffer,
 
 
 gboolean
-session_terminate(AgentObject* agent)
+session_terminate(AgentServer* agent)
 {
     RemoteSession* session = agent_get_remote_session(agent);
 
@@ -85,7 +85,7 @@ session_terminate(AgentObject* agent)
 }
 
 gboolean
-session_initialize(AgentObject* agent)
+session_initialize(AgentServer* agent)
 {
     RemoteSession* session = agent_get_remote_session(agent);
     session->process = get_available_child_process();
@@ -98,7 +98,7 @@ session_initialize(AgentObject* agent)
 }
 
 gboolean
-send_message_to_core(AgentObject* agent, gchar* buffer)
+send_message_to_core(AgentServer* agent, gchar* buffer)
 {
     RemoteSession* session = agent_get_remote_session(agent);
 
@@ -109,7 +109,7 @@ send_message_to_core(AgentObject* agent, gchar* buffer)
 
 
 void
-setup_session(AgentObject* agent, 
+setup_session(AgentServer* agent, 
               Message* data_string)
 {
     RemoteSession* session = agent_get_remote_session(agent);

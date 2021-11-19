@@ -6,7 +6,6 @@
 
 #include <error-code.h>
 #include <logging.h>
-#include <general-constant.h>
 #include <message-form.h>
 
 #include <glib-object.h>
@@ -90,7 +89,7 @@ send_message_to_host(AgentServer* object,
 gboolean
 register_with_host(AgentServer* agent)
 {
-    write_to_log_file(AGENT_GENERAL_LOG,"Registering with host");
+    worker_log_output("Registering with host");
     gchar* package = get_registration_message();
     send_message_to_host(agent, package); 
     return TRUE;     
@@ -102,25 +101,6 @@ register_with_host(AgentServer* agent)
 
 
 /*START get-set-function for Socket*/
-
-gchar*
-socket_get_host_url(AgentServer* agent)
-{
-    JsonParser* parser = json_parser_new();
-
-    GError* error = NULL;
-    json_parser_load_from_file(parser,HOST_CONFIG_FILE,error);
-    if(!error == NULL)
-    {
-        agent_report_error(agent, error->message);
-    }
-    JsonNode* root = json_parser_get_root(parser);
-    JsonObject* obj = json_node_get_object(root);
-
-    return json_object_get_string_member(obj,HOST_URL);
-}
-
-
 
 
 

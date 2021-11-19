@@ -1,6 +1,5 @@
 #include <glib.h>
 #include <agent-server.h>
-#include <general-constant.h>
 
 
 
@@ -32,12 +31,21 @@ static GOptionEntry entries[] = {
 int
 main(int argc, char* argv[])
 {
-    thinkmay_init(argv[0],14);
+    GOptionContext *context;
+    GError *error = NULL;
 
+    context = g_option_context_new ("- gstreamer webrtc sendrecv demo");
+    g_option_context_add_main_entries (context, entries, NULL);
+    g_option_context_add_group (context, gst_init_get_option_group ());
+    if (!g_option_context_parse (context, &argc, &argv, &error)) {
+        g_printerr ("Error initializing: %s\n", error->message);
+        return -1;
+    }
 
     agent_new(agent_port, 
             session_core_port, 
             token,
             manager_url,
             worker_ip);
+    return;
 }

@@ -3,41 +3,25 @@
 #include <gio/gio.h>
 #include <string.h>
 
+#include <libsoup/soup.h>
+
 #include <message-form.h>
 
 
 
-void
-time_stamp(GFileOutputStream* stream,
-            gchar* log)
-{
-    GTimeVal current_time;
-	g_get_current_time(&current_time);
-	gchar* iso_time = g_time_val_to_iso8601(&current_time);
-
-    Message* json_output = json_object_new();
-
-    json_object_set_string_member(json_output,"EmitTime",iso_time);
-    json_object_set_string_member(json_output,"LogContent",log);
-
-    gchar* timebuffer = get_string_from_json_object(json_output);
-    g_printerr(timebuffer);
-    g_free(timebuffer);
-    // g_output_stream_write(stream, timebuffer, strlen(timebuffer),NULL,NULL);
-}
 
 
 
 void
-write_to_log_file(gchar* file_name,
-                  gchar* text)
+worker_log_output(gchar* text)
 {
+    const gchar* http_aliases[] = { "http", NULL };
+    SoupSession* session = soup_session_new_with_options(
+            SOUP_SESSION_SSL_STRICT, FALSE,
+            SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
+            SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
 
-    GFile* log = g_file_parse_name(file_name);
-
-    GFileOutputStream* output_stream = 
-        g_file_append_to(log,G_FILE_CREATE_NONE,NULL,NULL);
-
-    time_stamp(output_stream,text);   
-    return;
+    SoupMessage* message = soup_message_new(SOUP_METHOD_POST,"http://192.168.1.12/Log");
+    soup_message_set_request(message,"application/text",SOUP_MEMORY_COPY,text,strlen(text));
+    soup_session_send(session,message,NULL,NULL);    
 }                  

@@ -51,7 +51,7 @@ file_transfer_initialize(gchar* signalling_url,
 						 gchar* file, 
 						 gchar* turn)
 {
-	write_to_log_file(SESSION_CORE_GENERAL_LOG,"Session core process started");
+	worker_log_output(SESSION_CORE_GENERAL_LOG,"Session core process started");
 
 	service.hub =				init_datachannel_pool();
 	service.signalling =		signalling_hub_initialize(&service);

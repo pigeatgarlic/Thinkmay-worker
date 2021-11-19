@@ -4,10 +4,10 @@
 #include <agent-child-process.h>
 #include <state-indicator.h>
 
-#include <general-constant.h>
 #include <child-process-constant.h>
 #include <error-code.h>
 #include <message-form.h>
+#include <general-constant.h>
 
 #include <gmodule.h>
 #include <Windows.h>

@@ -16,6 +16,7 @@ typedef enum
 	POINTER_LOCK,
 
 	KEYRESET,
+	QOE_REPORT
 
 
 }HidOpcode;

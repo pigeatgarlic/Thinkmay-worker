@@ -32,7 +32,6 @@ static GOptionEntry entries[] = {
 int
 main(int argc, char* argv[])
 {
-  thinkmay_init(argv[0],22);
 
 
   GOptionContext *context;

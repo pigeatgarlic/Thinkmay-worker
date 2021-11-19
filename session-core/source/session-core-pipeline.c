@@ -5,10 +5,8 @@
 #include <session-core-remote-config.h>
 
 
-#include <general-constant.h>
 #include <logging.h>
 #include <qoe.h>
-#include <exit-code.h>
 
 #include <gst/gst.h>
 #include <glib-2.0/glib.h>
@@ -116,9 +114,9 @@ start_pipeline(SessionCore* core)
     {
         GError error;
         error.message = "Fail to start pipeline, this may due to pipeline setup failure";
-        session_core_finalize(core, PIPELINE_ERROR_EXIT,&error);
+        session_core_finalize(core, &error);
     }
-    write_to_log_file(SESSION_CORE_GENERAL_LOG,"Starting pipeline");
+    worker_log_output("Starting pipeline");
     return TRUE;
 }
 
@@ -260,7 +258,7 @@ setup_element_factory(SessionCore* core,
         }
     }
     if (!error == NULL) {
-        session_core_finalize(core,PIPELINE_ERROR_EXIT,error);
+        session_core_finalize(core,error);
     }
     pipe->webrtcbin =
         gst_bin_get_by_name(GST_BIN(pipe->pipeline), "sendrecv");
@@ -507,7 +505,6 @@ setup_pipeline(SessionCore* core)
     connect_data_channel_signals(core);
     start_pipeline(core);
     session_core_set_state(core, REMOTE_CONNECT_STARTED);
-    signalling_hub_set_peer_call_state(signalling, PEER_CALL_DONE);
 }
 
 

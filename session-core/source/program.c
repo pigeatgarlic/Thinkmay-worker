@@ -1,6 +1,5 @@
 #include <session-core.h>
 #include <session-core-type.h>
-#include <general-constant.h>
 
 #include <gst/gst.h>
 #include <glib-2.0/glib.h>
@@ -56,7 +55,6 @@ static GOptionEntry entries[] = {
 int
 main(int argc, char* argv[])
 {
-    thinkmay_init(argv[0],21);
     
     GOptionContext *context;
     GError *error = NULL;

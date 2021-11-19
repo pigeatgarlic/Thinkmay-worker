@@ -109,8 +109,6 @@ PeerCallState                   signalling_hub_get_peer_call_state              
 
 SignallingServerState           signalling_hub_get_signalling_state                     (SignallingHub* hub);
 
-void                            signalling_hub_set_peer_call_state                      (SignallingHub* hub,
-                                                                                        PeerCallState state);
 
 void                            signalling_hub_set_signalling_state                     (SignallingHub* hub,
                                                                                         SignallingServerState state);

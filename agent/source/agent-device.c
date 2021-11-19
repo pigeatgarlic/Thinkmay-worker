@@ -2,7 +2,6 @@
 #include <agent-server.h>
 
 #include <logging.h>
-#include <general-constant.h>
 #include <message-form.h>
 
 #include <json-glib/json-glib.h>

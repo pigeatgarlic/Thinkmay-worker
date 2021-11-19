@@ -38,13 +38,6 @@ void	  		session_core_setup_webrtc_signalling	(SessionCore* self);
 /// <param name="self"></param>
 void			session_core_connect_signalling_server	(SessionCore* self);
 	
-/// <summary>
-/// session core send message to other module
-/// </summary> 
-/// <param name="self"></param>
-/// <param name="message"></param>
-void			session_core_send_message				(SessionCore* self,
-														 Message* message);
 
 /// <summary>
 /// initialize session core, 
@@ -61,7 +54,6 @@ SessionCore*	session_core_initialize					();
 /// <param name="exit_code">reason of exit</param>
 /// <param name="error">error emmited (if available)</param>
 void			session_core_finalize					(SessionCore* self,
-														gint exit_code,
 														GError* error);
 
 /// <summary>

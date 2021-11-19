@@ -118,7 +118,7 @@ send_message_to_signalling_server(FileTransferSignalling* signalling,
     
     gchar* buffer = get_string_from_json_object(json_object);
 
-    write_to_log_file(SESSION_CORE_NETWORK_LOG, buffer);
+    worker_log_output(SESSION_CORE_NETWORK_LOG, buffer);
     soup_websocket_connection_send_text(signalling->connection,buffer);
 }
 
@@ -276,7 +276,7 @@ register_with_server(FileTransferService* core)
     //gchar* buffer = malloc(10);
     //itoa(hub->SessionSlaveID, buffer, 10);
 
-    write_to_log_file(SESSION_CORE_GENERAL_LOG,"registering with signalling server");
+    worker_log_output(SESSION_CORE_GENERAL_LOG,"registering with signalling server");
     send_message_to_signalling_server(hub,SLAVE_REQUEST, SESSION_ACCEPTED);
     return TRUE;
 }
@@ -371,7 +371,7 @@ file_transfer_logger(SoupLogger* logger,
             const char         *data,
             gpointer            user_data)
 {
-    write_to_log_file(SESSION_CORE_NETWORK_LOG,data);
+    worker_log_output(SESSION_CORE_NETWORK_LOG,data);
 }
 
 
@@ -417,7 +417,7 @@ connect_to_websocket_signalling_server_async(FileTransferService* core)
 
     message = soup_message_new(SOUP_METHOD_GET, hub->signalling_server);
 
-    write_to_log_file(SESSION_CORE_NETWORK_LOG,"connecting to signalling server");
+    worker_log_output(SESSION_CORE_NETWORK_LOG,"connecting to signalling server");
 
     soup_session_websocket_connect_async(hub->session,
         message, NULL, NULL, NULL,
@@ -547,7 +547,7 @@ on_server_message(SoupWebsocketConnection* conn,
             const char* data = g_bytes_get_data(message, &size);
             /* Convert to NULL-terminated string */
             text = g_strndup(data, size);
-            write_to_log_file(SESSION_CORE_GENERAL_LOG,text);
+            worker_log_output(SESSION_CORE_GENERAL_LOG,text);
             break;
         }
         default:
@@ -611,7 +611,7 @@ on_server_connected(SoupSession* session,
         file_transfer_finalize(core, SIGNALLING_SERVER_CONNECTION_ERROR_EXIT,error);
     }
 
-    write_to_log_file(SESSION_CORE_GENERAL_LOG,"connected with signalling server");
+    worker_log_output(SESSION_CORE_GENERAL_LOG,"connected with signalling server");
     g_signal_connect(hub->connection, "closed", G_CALLBACK(on_server_closed), core);
     g_signal_connect(hub->connection, "message", G_CALLBACK(on_server_message), core);
 

@@ -10,10 +10,7 @@
 /// </summary>
 /// <param name="file_name"></param>
 /// <param name="text"></param>
-void                write_to_log_file           (gchar* file_name,
-                                                 gchar* text);
+void                worker_log_output           (gchar* text);
 
 
 #endif
-
-

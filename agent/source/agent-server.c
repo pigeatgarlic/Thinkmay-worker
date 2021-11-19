@@ -14,7 +14,6 @@
 #include <glib-2.0/glib/gstdio.h>
 
 #include <child-process-constant.h>
-#include <general-constant.h>
 #include <logging.h>
 #include <error-code.h>
 #include <message-form.h>
@@ -63,13 +62,6 @@ struct _AgentServer
 
 
 
-
-
-
-
-
-
-
 static AgentServer agent_declare = {0};
 
 
@@ -94,19 +86,7 @@ init_agent_server()
 	agent_declare.server = server;
 
 	soup_server_add_handler(agent_declare.server,
-		"/cluster/Initialize",server_callback,&agent_declare,&agent_declare);
-
-	soup_server_add_handler(agent_declare.server,
-		"/cluster/Terminate",server_callback,&agent_declare,&agent_declare);
-		
-	soup_server_add_handler(agent_declare.server,
-		"/cluster/Disconnect",server_callback,&agent_declare,&agent_declare);
-
-	soup_server_add_handler(agent_declare.server,
-		"/cluster/Reconnect",server_callback,&agent_declare,&agent_declare);
-
-	soup_server_add_handler(agent_declare.server,
-		"/cluster/Shell",server_callback,&agent_declare,&agent_declare);
+		"/",server_callback,&agent_declare,&agent_declare);
 
 	soup_server_listen_all(agent_declare.server,2250,0,&error);
 	if(error){g_printerr(error->message); return;}
@@ -147,9 +127,7 @@ server_callback (SoupServer        *server,
 	SoupMessageHeadersIter iter;
 	SoupMessageBody *request_body;
 	const char *name, *value;
-	SoupHTTPVersion http_version;
 	AgentServer* agent = (AgentServer*) user_data;
-
 	SoupURI* uri = soup_message_get_uri(msg);
 
 	soup_message_headers_iter_init (&iter, msg->request_headers);
@@ -158,15 +136,31 @@ server_callback (SoupServer        *server,
 		if(!g_strcmp0(name,"Authorization") &&
 		   !g_strcmp0(value,agent->token))
 		{
-			
+			if(!g_strcmp0(uri->path,"/cluster/Initialize"))
+			{
 
+			}
+			else if(!g_strcmp0(uri->path,"/cluster/Disconnect"))
+			{
+
+			}
+			else if(!g_strcmp0(uri->path,"/cluster/Reconnect"))
+			{
+
+			}
+			else if(!g_strcmp0(uri->path,"/cluster/Terminate"))
+			{
+
+			}
+			else if(!g_strcmp0(uri->path,"/cluster/Shell"))
+			{
+				initialize_shell_session(agent,msg);
+			}
+			msg->status_code = SOUP_STATUS_OK;
 			return;
 		}
 	}
-	msg->status_code = SOUP_STATUS_OK;
-    SoupMessageBody* body = msg->response_body;
-	gchar* buffer = "hello";
-	soup_message_set_response(msg,"application/text",SOUP_MEMORY_COPY,buffer,strlen(buffer));
+	msg->status_code = SOUP_STATUS_UNAUTHORIZED;
 }
 
 

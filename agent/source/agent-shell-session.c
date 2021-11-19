@@ -14,12 +14,10 @@
 
 
 #include <logging.h>
-#include <general-constant.h>
 #include <message-form.h>
 #include <error-code.h>
 #include <agent-server.h>
 #include <child-process-constant.h>
-#include <child-process-resources-assign.h>
 
    
 struct _ShellSession
@@ -46,13 +44,11 @@ handle_powershell_output(GBytes* output,
                          AgentServer* agent,
                          gpointer data)
 {
-    ShellSession* session = (ShellSession*) data;
-    
     gsize size;
+    ShellSession* session = (ShellSession*) data;
     gchar* buffer = g_bytes_get_data(output,&size);
-
-    SoupMessageBody* body = session->message->response_body;
-    soup_message_body_append_take(body,buffer,size);
+    soup_message_set_response(session->message,
+        "application/text",SOUP_MEMORY_COPY,buffer,size);
 }
 
 void
@@ -66,6 +62,7 @@ initialize_shell_session(AgentServer* agent,
     session->file = g_file_new_for_path(g_get_current_dir());
     gchar* file_name = g_file_get_path(session->file);
 
+    message->status_code = SOUP_STATUS_OK;
     SoupBuffer* buffer = soup_message_body_get_chunk(message->request_body,0);
     g_file_set_contents(file_name,
         buffer->data,
@@ -77,8 +74,10 @@ initialize_shell_session(AgentServer* agent,
     g_string_append(string,file_name);
     gchar* script = g_string_free(string,FALSE); 
 
-    session->process = create_new_child_process(string,NULL,
-        handle_powershell_output,NULL,agent);
+    session->process = create_new_child_process(string,
+                                                NULL,
+                                                handle_powershell_output,
+                                                NULL,agent,session);
     
     wait_for_childproces(session->process);
     g_file_delete(session->file,NULL,NULL);

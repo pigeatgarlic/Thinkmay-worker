@@ -32,7 +32,8 @@ ChildProcess*		create_new_child_process					(gchar* binary_name,
 																 ChildStdErrHandle stderrhdl,
 																 ChildStdOutHandle stdouthdl,
 																 ChildStateHandle handler,
-																 AgentServer* agent);
+																 AgentServer* agent,
+																 gpointer data);
 
 
 /// <summary>

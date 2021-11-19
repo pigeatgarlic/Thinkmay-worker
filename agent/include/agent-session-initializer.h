@@ -1,4 +1,3 @@
-#pragma once
 #ifndef __AGENT_SESSION_INITIALIZER_H__ 
 #define __AGENT_SESSION_INITIALIZER_H__ 
 
@@ -18,16 +17,6 @@
 /// <param name="buffer"></param>
 /// <returns></returns>
 gboolean			send_message_to_core							(AgentServer* self,
-																	 gchar* buffer);
-/// <summary>
-/// (ATOMIC function)
-/// send message to session loader using standard input output (stdio)
-/// should only be used by send_message function
-/// </summary>
-/// <param name="self"></param>
-/// <param name="buffer"></param>
-/// <returns></returns>
-gboolean			send_message_to_loader							(AgentServer* self,
 																	 gchar* buffer);
 
 /// <summary>
@@ -65,7 +54,8 @@ gboolean			remote_control_reconnect						(AgentServer* object);
 /// 
 /// </summary>
 /// <param name="agent"></param>
-void				intialize_remote_session_service				(AgentServer* agent);
+RemoteSession*		intialize_remote_session_service				(AgentServer* agent,
+                                 								     gchar* session_core_port);
 
 /// <summary>
 /// 

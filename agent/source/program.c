@@ -8,10 +8,10 @@
 
 
 static gint agent_port = 2520;
-static gint session_core_port = 2250;
+static gchar session_core_port[10] = "2250";
 static gchar worker_ip[20] = "192.168.1.12";
 static gchar manager_url[20] = "192.168.1.12";
- 
+static gchar token[200] = {0}; 
 
 
 
@@ -37,6 +37,7 @@ main(int argc, char* argv[])
 
     agent_new(agent_port, 
             session_core_port, 
+            token,
             manager_url,
             worker_ip);
 }

@@ -1,8 +1,6 @@
 #include <agent-session-initializer.h>
-#include <agent-state-on-session-off-remote.h>
 #include <agent-socket.h>
 #include <agent-type.h>
-#include <agent-message.h>
 #include <agent-child-process.h>
 #include <state-indicator.h>
 
@@ -20,58 +18,57 @@
 
 struct _RemoteSession
 {
-    gint process_id;
-
     ChildProcess* process;
+
+    gchar session_core_url[20];
+
+    SoupSession* session;
 };
 
 static RemoteSession remote_session_singleton;
 
-void
-intialize_remote_session_service(AgentServer* agent)
+RemoteSession*
+intialize_remote_session_service(AgentServer* agent,
+                                 gchar* session_core_port)
 {
-    agent_set_remote_session(agent, &remote_session_singleton);
+    GString* base_url = g_string_new("http://localhost:");
+    g_string_append(base_url,session_core_port);
+    g_string_append(base_url,"/agent");
+    gchar* url = g_string_free(base_url,FALSE);
+
+    const gchar* http_aliases[] = { "http", NULL };
+    remote_session_singleton.session = soup_session_new_with_options(
+            SOUP_SESSION_SSL_STRICT, FALSE,
+            SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
+            SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
+
+    remote_session_singleton.process = NULL;
+    memcpy(remote_session_singleton.session_core_url,url,strlen(url));
+    return &remote_session_singleton;
 }
 
 
 static void
 handler_session_core_state_function(ChildProcess* proc,
-                                    DWORD exit_code, 
                                     AgentServer* agent)
 {
-    /*
-    *if child process terminated is session core
-    *let agent handle that
-    */
-    if (exit_code != STILL_ACTIVE)
-    {
-        agent_on_session_core_exit(agent);
-        close_child_process(proc);
-        return;
-    }
-
-    /*
-    *if child process is session core, check for current state of agent,
-    *Terminate process if agent is not in session,
-    */
-
-    if(g_strcmp0(agent_get_current_state_string(agent) , AGENT_ON_SESSION))
-    {
-        close_child_process(proc);
-        return;
-    }
-        
 }
 
 
-
 static void
-handle_session_core_function(GBytes* buffer,
-    gint process_id,
-    AgentServer* agent)
+handle_session_core_error(GBytes* buffer,
+    AgentServer* agent,
+    gpointer data)
 {
     gchar* message = g_bytes_get_data(buffer, NULL);
-    on_agent_message(agent, message);
+}
+
+static void
+handle_session_core_output(GBytes* buffer,
+    AgentServer* agent,
+    gpointer data)
+{
+    gchar* message = g_bytes_get_data(buffer, NULL);
 }
 
 
@@ -80,60 +77,31 @@ session_terminate(AgentServer* agent)
 {
     RemoteSession* session = agent_get_remote_session(agent);
 
-    close_child_process(
-        agent_get_child_process(agent, session->process_id));
 }
 
 gboolean
 session_initialize(AgentServer* agent)
 {
     RemoteSession* session = agent_get_remote_session(agent);
-    session->process = get_available_child_process();
-    session->process_id = get_child_process_id(session->process);
 
+    session->process =
     create_new_child_process(SESSION_CORE_BINARY,
-        session->process_id, " ", 
-        (ChildStdHandle)handle_session_core_function,
-        (ChildStateHandle)handler_session_core_state_function, agent);
+        (ChildStdErrHandle)handle_session_core_error,
+        (ChildStdOutHandle)handle_session_core_output,
+        (ChildStateHandle)handler_session_core_state_function, agent,NULL);
 }
 
 gboolean
 send_message_to_core(AgentServer* agent, gchar* buffer)
 {
     RemoteSession* session = agent_get_remote_session(agent);
+    SoupMessage* message = soup_message_new(SOUP_METHOD_POST,session->session_core_url);
 
-    send_message_to_child_process(
-        agent_get_child_process(agent, session->process_id), 
-            buffer, strlen(buffer) * sizeof(gchar));
-}
+    gchar* token = agent_get_token(agent);
+    soup_message_headers_append(message->request_headers,"Authorization",token);
 
-
-void
-setup_session(AgentServer* agent, 
-              Message* data_string)
-{
-    RemoteSession* session = agent_get_remote_session(agent);
-
-    GError* error = NULL;
-    JsonParser* parser = json_parser_new();
-    Message* json_data = get_json_object_from_string(data_string, &error, parser);
-    if(!error == NULL || json_data == NULL) 
-	{
-		g_object_unref(parser);
-		return;
-	}
-
-    GFile* file = g_file_parse_name(SESSION_SLAVE_FILE);
-    gchar* session_slave = get_string_from_json_object(json_data);
+    SoupMessageBody* body = message->request_body;
+    soup_message_body_append_take(body,buffer,strlen(buffer));
     
-
-    if(!g_file_replace_contents(file, session_slave,strlen(session_slave),
-        NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL, NULL,NULL))
-    {
-        agent_report_error(agent,ERROR_FILE_OPERATION);					
-    }
-
-    agent_session_initialize(agent);
-    g_object_unref(parser);
-    return;
+    soup_session_send(session->session,message,NULL,NULL);
 }

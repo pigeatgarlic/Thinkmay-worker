@@ -5,7 +5,6 @@
 
 #include <agent-type.h>
 #include <agent-device.h>
-#include <agent-state.h>
  
 #include <Windows.h>
 
@@ -87,7 +86,8 @@ void											agent_finalize						(AgentServer* object);
 /// <param name="Host_ID"></param>
 /// <returns></returns>
 AgentServer*									agent_new							(gint agent_port,
-																					gint session_core_port,
+																					gchar* session_core_port,
+																					gchar* token, 
 																					gchar* manager_url,
 																					gchar* worker_ip);
 
@@ -97,12 +97,6 @@ AgentServer*									agent_new							(gint agent_port,
 /// <param name="self"></param>
 void											handle_host_connection				(AgentServer* self);
 
-/// <summary>
-/// send message to other module
-/// </summary>
-/// <param name="self"></param>
-/// <param name="message">message to send</param>
-void											agent_send_message					(AgentServer* self, Message* message);
 
 /// <summary>
 /// send message to arbitrary device in system
@@ -127,14 +121,6 @@ void											agent_send_message_to_session_core	(AgentServer* self,
 /// <param name="server_commmand"></param>
 void											agent_start_file_transfer			(gchar* server_commmand);
 
-
-/// <summary>
-/// 
-/// </summary>
-/// <param name="self"></param>
-/// <param name="message"></param>
-void											agent_send_message_to_session_loader(AgentServer* self,
-																					 gchar* message);
 
 /// <summary>
 /// register slave device with host by sending SLAVE_REGISTER message,
@@ -197,6 +183,11 @@ void											agent_set_remote_session			(AgentServer* self,
 																					 RemoteSession* session);
 
 GMainLoop*										agent_get_main_loop					(AgentServer* self);
+
+gchar* 											agent_get_token						(AgentServer* self);
+
+void											agent_server_set_token				(AgentServer* self,
+																					 gchar* token);
 /*END get-set function for agent object*/
 
 

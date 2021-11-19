@@ -3,7 +3,7 @@
 #include "agent-type.h"
 #include "glib.h"
 
-#include <Windows.h>
+
 /// <summary>
 /// send message to child process
 /// </summary>
@@ -19,7 +19,7 @@ gboolean			send_message_to_child_process				(ChildProcess* self,
 /// close child process
 /// </summary>
 /// <param name="proc">child process which will be close</param>
-void				close_child_process							(ChildProcess* proc);
+void				wait_for_childproces						(ChildProcess* process);
 
 
 
@@ -29,41 +29,10 @@ void				close_child_process							(ChildProcess* proc);
 /// <param name="binary_name">name of binary</param>
 /// <returns></returns>
 ChildProcess*		create_new_child_process					(gchar* binary_name,
-																 gint id,
-																 gchar* parsed_command,
-																 ChildStdHandle func,
+																 ChildStdErrHandle stderrhdl,
+																 ChildStdOutHandle stdouthdl,
 																 ChildStateHandle handler,
 																 AgentServer* agent);
-
-/// <summary>
-/// 
-/// </summary>
-/// <returns></returns>
-ChildProcess* 		get_available_child_process					();
-
-/// <summary>
-/// 
-/// </summary>
-/// <returns></returns>
-ChildProcess* 		get_available_file_transceiver				();
-
-
-/// <summary>
-/// 
-/// </summary>
-/// <param name="agent"></param>
-void				initialize_child_process_system				(AgentServer* agent);
-
-
-/// <summary>
-/// get state of a specific child process, 
-/// return true if it is running,
-/// otherwise, return false
-/// </summary>
-/// <param name="buffer"></param>
-/// <param name="agent"></param>
-gboolean			get_current_child_process_state				(AgentServer* agent,
-																 gint order);
 
 
 /// <summary>
@@ -71,5 +40,11 @@ gboolean			get_current_child_process_state				(AgentServer* agent,
 /// </summary>
 /// <param name="process"></param>
 /// <returns></returns>
-gint 				get_child_process_id						(ChildProcess* process);
+void 				childprocess_force_exit						(ChildProcess* proc);
+
+/// <summary>
+/// 
+/// </summary>
+/// <param name="proc"></param>
+void 				clean_childprocess							(ChildProcess* proc);
 #endif

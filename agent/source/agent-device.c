@@ -1,9 +1,9 @@
 #include <agent-device.h>
 #include <agent-server.h>
-#include <agent-message.h>
 
 #include <logging.h>
 #include <general-constant.h>
+#include <message-form.h>
 
 #include <json-glib/json-glib.h>
 #define DIV 1048576
@@ -46,6 +46,8 @@ struct _DeviceState
 DeviceInformation*
 get_device_information() 
 {
+#ifdef G_OS_WIN32
+
 	DeviceInformation* device_info = malloc(sizeof(DeviceInformation));
 	memset(device_info,0, sizeof(DeviceInformation));
 
@@ -87,7 +89,6 @@ get_device_information()
 	memcpy(device_info->gpu , &adapters->Description,512);
 
 
-#ifdef WIN32
 
 	gchar OS[100] ;
 	memset(&OS,0, sizeof(OS));
@@ -105,18 +106,18 @@ get_device_information()
 	strcat(OS, major);
 	strcat(OS, ".");
 	strcat(OS, minor);
-#endif // 
 
 
 
 	memcpy(device_info->OS , &OS,strlen(OS));
+#endif 
 
 	return device_info;
 }
 
 
-Message*
-get_registration_message(gint id)
+gchar*
+get_registration_message()
 {
 	DeviceInformation* infor = get_device_information();
 	JsonObject* information = json_object_new();
@@ -125,6 +126,6 @@ get_registration_message(gint id)
 	json_object_set_string_member(information,	"GPU", infor->gpu);
 	json_object_set_string_member(information,	"OS", infor->OS);
 	json_object_set_int_member(information,		"RAMcapacity", infor->ram_capacity);
-	json_object_set_int_member(information,		"ID", id);
-	return information;
+
+	return get_string_from_json_object(information);
 }

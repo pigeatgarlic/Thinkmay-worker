@@ -9,8 +9,6 @@ pkg_check_modules(LIBSOUP REQUIRED libsoup-2.4)
 
 file(GLOB SOURCE 
 ${CMAKE_SOURCE_DIR}/agent/source/*.c 
-${CMAKE_SOURCE_DIR}/agent/source/file-transfer/*.c 
-${CMAKE_SOURCE_DIR}/agent/source/agent-state/*.c
 ${CMAKE_SOURCE_DIR}/shared-items/source/*.c)
 
 
@@ -25,8 +23,6 @@ set_target_properties(agent PROPERTIES
 target_include_directories(agent 
 PUBLIC
     ${CMAKE_SOURCE_DIR}/agent/include
-    ${CMAKE_SOURCE_DIR}/agent/include/file-transfer
-    ${CMAKE_SOURCE_DIR}/agent/include/agent-state
 	
 
     

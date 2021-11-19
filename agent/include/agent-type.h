@@ -83,17 +83,26 @@ typedef		   JsonObject			Message;
 /// this function is settled inside a looped thread 
 /// and sould be invoked when child process emit output to stdout  
 /// </summary>
-typedef void  (*ChildStdHandle)    (GBytes* buffer,
-                                     gint process_id,
-                                     AgentServer* agent);
+typedef void  (*ChildStdOutHandle)    (GBytes* buffer,
+                                     AgentServer* agent,
+                                     gpointer data);
+
+/// <summary>
+/// child standard input output handle, 
+/// this function is settled inside a looped thread 
+/// and sould be invoked when child process emit output to stdout  
+/// </summary>
+typedef void  (*ChildStdErrHandle)    (GBytes* buffer,
+                                     AgentServer* agent,
+                                     gpointer data);
 /// <summary>
 /// child state handle function is setteled inside a looped thread 
 /// and responsible for manage state of child process thread
 /// (Ex: report session disconnected to host if session core process ended)
 /// </summary>
-typedef void  (*ChildStateHandle)  (ChildProcess* ProcessID,
-                                    DWORD ProcessState,
-                                    AgentServer* agent);
+typedef void  (*ChildStateHandle)  (ChildProcess* proc,
+                                    AgentServer* agent,
+                                    gpointer data);
 
 
 

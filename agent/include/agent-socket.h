@@ -1,4 +1,3 @@
-#pragma once
 #ifndef __SOCKET_H__
 #define __SOCKET_H__
 
@@ -80,7 +79,8 @@ gpointer                                update_device_with_host             (Age
 /// </summary>
 /// <param name="host_url"></param>
 /// <returns>Socket correspond to host url</returns>
-Socket*                                 initialize_socket                   (AgentServer* agent);
+Socket*                                 initialize_socket                   (gchar* token,
+																			 gchar* manager_ip);
 
 /// <summary>
 /// close socket, this should be used after agent termination signal is send
@@ -113,6 +113,10 @@ void                                    socket_set_host_url                 (Soc
 /// <param name="socket"></param>
 /// <returns></returns>
 gchar*                                  socket_get_host_url                 (Socket* socket);
+
+
+void									socket_set_token					(Socket* socket,
+																			 gchar* token);
 
 /*END get-set function for Socket*/
 

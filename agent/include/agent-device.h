@@ -25,7 +25,8 @@ gpointer				update_device					(AgentServer* data);
 
 
 
-Message*                get_registration_message        (gint id);
+gchar*                  get_registration_message        ();
+
 
 
 

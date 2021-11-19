@@ -17,7 +17,7 @@ Quick Links:
 - Website: https://www.thinkmay.net
 - Slack (chat channel): https://join.slack.com/t/thinkmayworkspace/shared_invite/zt-ywglslgj-fQb4Po4JagVaHbZ8wwiqpg
 - Architecture document (miro): https://miro.com/app/board/o9J_lTKComc=/?invite_link_id=202014558866
-- Detailed document (notion): https://www.notion.so/invite/d8ab5a15ff6ca0f4df12c3e6b292456dfb9a83b9
+- Detailed document (notion): https://thinkonmay.notion.site/5a4909c660374a4ca0286d766bf3b9f1?v=bd0da1b672c14c6fbe2f2ad4d29b99b7
 
 Build Requirement: 
 -----------

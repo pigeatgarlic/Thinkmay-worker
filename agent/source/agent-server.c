@@ -86,7 +86,7 @@ init_agent_server()
 	agent_declare.server = server;
 
 	soup_server_add_handler(agent_declare.server,
-		"/",server_callback,&agent_declare,&agent_declare);
+		"/",server_callback,&agent_declare,NULL);
 
 	soup_server_listen_all(agent_declare.server,2250,0,&error);
 	if(error){g_printerr(error->message); return;}

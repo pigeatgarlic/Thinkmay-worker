@@ -119,11 +119,4 @@ IPC*			session_core_get_ipc					(SessionCore* core);
 void			report_session_core_error				(SessionCore* self,
 														 ErrorCode code);
 
-/// <summary>
-/// get main context from session core
-/// </summary>
-/// <param name="core"></param>
-/// <returns></returns>
-GMainContext*	session_core_get_main_context			(SessionCore* core);
-
 #endif 

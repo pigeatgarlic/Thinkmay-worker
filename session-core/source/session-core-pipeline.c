@@ -366,7 +366,6 @@ connect_signalling_handler(SessionCore* core)
     Pipeline* pipe = session_core_get_pipeline(core);
     SignallingHub* hub = session_core_get_signalling_hub(core);
 
-    g_main_context_push_thread_default(session_core_get_main_context(core));
     /* Add stun server */
     g_object_set(pipe->webrtcbin, "stun-server", 
        "stun://stun.thinkmay.net:3478", NULL);
@@ -484,27 +483,20 @@ setup_pipeline(SessionCore* core)
     QoE* qoe= session_core_get_qoe(core);
 
 
-    pipe->state = PIPELINE_CREATING_ELEMENT;
-
-    
 
     setup_element_factory(core, 
         qoe_get_video_codec(qoe),
         qoe_get_audio_codec(qoe));
 
-    pipe->state = PIPELINE_CONNECT_ELEMENT_SIGNAL;
     connect_signalling_handler(core);
     
-    pipe->state = PIPELINE_SETTING_UP_ELEMENT;
     setup_element_property(core);
 
 
 
     gst_element_change_state(pipe->pipeline, GST_STATE_READY);
-    pipe->state = PIPELINE_SETUP_DONE;
     connect_data_channel_signals(core);
     start_pipeline(core);
-    session_core_set_state(core, REMOTE_CONNECT_STARTED);
 }
 
 

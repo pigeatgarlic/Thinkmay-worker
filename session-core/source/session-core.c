@@ -17,11 +17,11 @@
 
 struct _SessionCore
 {
+	SoupServer* server;
+
 	Pipeline* pipe;
 
 	WebRTCHub* hub;
-
-	CoreState state;
 
 	GMainLoop* loop;
 
@@ -29,13 +29,19 @@ struct _SessionCore
 
 	QoE* qoe;
 
-	IPC* ipc;
+	gchar* token;
 };
 
 
 
 
+static SessionCore core_declare;
 
+void	   server_callback (SoupServer        *server,
+							SoupMessage	   *msg,
+							const char        *path,
+							GHashTable        *query,
+							gpointer           user_data);
 /// <summary>
 /// setup slave session, this step include get value from json config file 
 /// </summary>
@@ -44,31 +50,86 @@ static void
 session_core_setup_session(SessionCore* self)
 {
 	pipeline_set_state(self->pipe, PIPELINE_READY);
-	self->state = SESSION_INFORMATION_SETTLED;
 	worker_log_output("session core setup done");
 }
+
+static SoupServer*
+init_session_core_server()
+{
+	GError* error = NULL;
+	SoupServer* server = soup_server_new(NULL);
+
+	soup_server_add_handler(server,
+		"/",server_callback,&core_declare,NULL);
+
+	soup_server_listen_all(server,2250,0,&error);
+	if(error){g_printerr(error->message); return;}
+	return server;
+}
+
+
+
+void
+server_callback (SoupServer        *server,
+                 SoupMessage	   *msg,
+		 		 const char        *path,
+                 GHashTable        *query,
+		 		 gpointer           user_data)
+{
+	char *file_path;
+	SoupMessageHeadersIter iter;
+	SoupMessageBody *request_body;
+	const char *name, *value;
+	SessionCore* core = (SessionCore*) user_data;
+	SoupURI* uri = soup_message_get_uri(msg);
+
+	soup_message_headers_iter_init (&iter, msg->request_headers);
+	while (soup_message_headers_iter_next (&iter, &name, &value))
+	{
+		if(!g_strcmp0(name,"Authorization") &&
+		   !g_strcmp0(value,core->token))
+		{
+			if(!g_strcmp0(uri->path,"/cluster/Initialize"))
+			{
+
+			}
+			else if(!g_strcmp0(uri->path,"/cluster/Disconnect"))
+			{
+
+			}
+			else if(!g_strcmp0(uri->path,"/cluster/Reconnect"))
+			{
+
+			}
+			else if(!g_strcmp0(uri->path,"/cluster/Terminate"))
+			{
+
+			}
+			msg->status_code = SOUP_STATUS_OK;
+			return;
+		}
+	}
+	msg->status_code = SOUP_STATUS_UNAUTHORIZED;
+}
+
+
 
 SessionCore*
 session_core_initialize()
 {
-	static SessionCore core;
 	worker_log_output("Session core process started");
 
-	core.hub =				webrtchub_initialize();
-	core.signalling =		signalling_hub_initialize(&core);
+	core_declare.server = 			init_session_core_server();
+	core_declare.hub =				webrtchub_initialize();
+	core_declare.signalling =		signalling_hub_initialize(&core_declare);
+	core_declare.qoe =				qoe_initialize();
+	core_declare.pipe =				pipeline_initialize(&core_declare);
+	core_declare.loop =				g_main_loop_new(NULL, FALSE);
 
-	core.qoe =				qoe_initialize();
-	core.pipe =				pipeline_initialize(&core);
-
-	core.state =			SESSION_CORE_INITIALIZING;
-	core.loop =				g_main_loop_new(NULL, FALSE);
-	 
-	session_core_setup_session(&core);
-
-
-	session_core_connect_signalling_server(&core);
-	g_main_loop_run(core.loop);
-	return &core;	
+	session_core_setup_session(&core_declare);
+	session_core_connect_signalling_server(&core_declare);
+	g_main_loop_run(core_declare.loop);
+	return &core_declare;	
 }
 
 
@@ -135,32 +196,8 @@ session_core_get_qoe(SessionCore* self)
 }
 
 
-CoreState
-session_core_get_state(SessionCore* self)
-{
-	return self->state;
-}
-
-void
-session_core_set_state(SessionCore* core, CoreState state)
-{
-	core->state = state;
-}
-
 SignallingHub*
 session_core_get_signalling_hub(SessionCore* core)
 {
 	return core->signalling;
-}
-
-IPC*
-session_core_get_ipc(SessionCore* core)
-{
-	return core->ipc;
-}
-
-GMainContext*
-session_core_get_main_context(SessionCore* core)
-{
-	return g_main_loop_get_context(core->loop);
 }

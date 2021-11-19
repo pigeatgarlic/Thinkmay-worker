@@ -98,9 +98,7 @@ setup_webrtcbin(FileTransferService* core)
         return NULL;
 
     gst_element_change_state(bin->pipeline, GST_STATE_READY);
-
     connect_data_channel_signals(core);
-
     start_file_transfer(core);
 }
 

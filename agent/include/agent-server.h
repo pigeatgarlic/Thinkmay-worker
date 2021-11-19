@@ -86,7 +86,10 @@ void											agent_finalize						(AgentServer* object);
 /// <param name="Host_URL"></param>
 /// <param name="Host_ID"></param>
 /// <returns></returns>
-AgentServer*									agent_new							();
+AgentServer*									agent_new							(gint agent_port,
+																					gint session_core_port,
+																					gchar* manager_url,
+																					gchar* worker_ip);
 
 /// <summary>
 /// handle message from host

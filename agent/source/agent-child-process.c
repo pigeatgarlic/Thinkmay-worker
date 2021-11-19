@@ -136,34 +136,6 @@ handle_child_process_state(gpointer data)
     }
 }
 
-static ChildPipe*
-initialize_process_handle(ChildProcess* self,
-                          AgentServer* agent)
-{
-    static ChildPipe hdl;
-
-    SECURITY_ATTRIBUTES attr;
-    attr.nLength = sizeof(SECURITY_ATTRIBUTES);
-    attr.bInheritHandle = TRUE;
-    attr.lpSecurityDescriptor = NULL;
-
-    if (!CreatePipe(&self->standard_out, &hdl.standard_out, &attr, 0))
-    {
-        agent_report_error(agent,"cannot create session core pipe");
-        return NULL;
-    }
-    if (!CreatePipe(&hdl.standard_in, &self->standard_in, &attr, 0))
-    {
-        agent_report_error(agent,"cannot create session core pipe");
-        return NULL;
-    }
-
-    SetHandleInformation(self->standard_in, HANDLE_FLAG_INHERIT, 0);
-    SetHandleInformation(self->standard_out, HANDLE_FLAG_INHERIT, 0);
-    return &hdl;
-}
-
-
 
 gboolean
 send_message_to_child_process(ChildProcess* self,
@@ -227,6 +199,9 @@ create_new_child_process(gchar* process_name,
     g_string_append(string_process,parsed_command);
     gchar* process = g_string_free(string_process,FALSE); 
     /*START process, all standard input and output are controlled by agent*/
+
+    
+
     gboolean output = CreateProcess(NULL,
         process,
         NULL,

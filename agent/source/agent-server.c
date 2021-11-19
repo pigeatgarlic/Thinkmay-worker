@@ -98,18 +98,44 @@ do_post (SoupServer *server,
 		const char *path);
 
 
+static SoupServer*
+init_agent_server()
+{
+	SoupServer* server = g_object_new(SOUP_TYPE_SERVER,NULL);
+
+	soup_server_add_handler(agent_declare.server,
+		"/agent/Initialize",server_callback,&agent_declare,NULL);
+
+	soup_server_add_handler(agent_declare.server,
+		"/agent/Terminate",server_callback,&agent_declare,NULL);
+		
+	soup_server_add_handler(agent_declare.server,
+		"/agent/Disconnect",server_callback,&agent_declare,NULL);
+
+	soup_server_add_handler(agent_declare.server,
+		"/agent/Reconnect",server_callback,&agent_declare,NULL);
+
+	soup_server_add_handler(agent_declare.server,
+		"/agent/Shell",server_callback,&agent_declare,NULL);
+
+	soup_server_listen_all(agent_declare.server,2250,0,&error);
+	if(error){g_printerr(error->message); return;}
+}
+
+
 AgentServer*
-agent_new(gchar* url)
+agent_new(gint url, 
+		gint session_core_port, 
+		gchar* manager_url, 
+		gchar* worker_ip)
 {	
 	GError* error = NULL;
 	//set initial state of agent as unregistered	
 	AgentState* unregistered = transition_to_unregistered_state();
 	agent_declare.state = unregistered;
+	agent_declare.server = init_agent_server();
+	if(!agent_declare.server){return;}
 
-	agent_declare.server = g_object_new(SOUP_TYPE_SERVER,NULL);
-	soup_server_add_handler(agent_declare.server,"/agent",server_callback,&agent_declare,NULL);
-	soup_server_listen_all(agent_declare.server,2250,0,&error);
-	if(error){g_printerr(error->message); return;}
 
 
 
@@ -140,13 +166,13 @@ server_callback (SoupServer        *server,
 	const char *name, *value;
 	SoupHTTPVersion http_version;
 
-	g_object_get(msg,"http-version",&http_version,NULL);
-	g_print ("%s %s HTTP/1.%d\n", msg->method, path, http_version);
 
 	soup_message_headers_iter_init (&iter, msg->request_headers);
-
 	while (soup_message_headers_iter_next (&iter, &name, &value))
-		g_print ("%s: %s\n", name, value);
+	{
+		if(g_strcmp0())
+		
+	}
 
         request_body = msg->request_body;
 	if (request_body->length)

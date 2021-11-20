@@ -1,4 +1,3 @@
-
 #include <session-core-signalling.h>
 #include <session-core.h>
 #include <session-core-pipeline.h>
@@ -248,14 +247,6 @@ on_ice_gathering_state_notify(GstElement* webrtcbin,
 gboolean
 register_with_server(SessionCore* core)
 {
-    gchar* hello;
-    CoreState* state;
-    JsonObject* json_object = json_object_new();
-    SignallingHub* hub = session_core_get_signalling_hub(core);
-
-    //gchar* buffer = malloc(10);
-    //itoa(hub->SessionSlaveID, buffer, 10);
-
     worker_log_output("registering with signalling server");
     send_message_to_signalling_server(hub,SLAVE_REQUEST, SESSION_ACCEPTED);
     return TRUE;
@@ -391,13 +382,13 @@ connect_to_websocket_signalling_server_async(SessionCore* core)
             SOUP_SESSION_HTTPS_ALIASES, https_aliases, NULL);
 
     logger = soup_logger_new(SOUP_LOGGER_LOG_BODY, -1);
-    soup_session_add_feature(hub->session, SOUP_SESSION_FEATURE(logger));
-    g_object_unref(logger);
 
+    GString* request_uri = g_string_new(hub->signalling_server);
+    g_string_append(request_uri,"?token=");
+    g_string_append(request_uri,session_core_get_token(core));
+    gchar* request_string = g_string_free(request_uri,FALSE);
 
-    soup_logger_set_printer(logger,session_core_logger,NULL,NULL);
-
-    message = soup_message_new(SOUP_METHOD_GET, hub->signalling_server);
+    message = soup_message_new(SOUP_METHOD_GET, request_string);
 
     worker_log_output("connecting to signalling server");
 
@@ -541,7 +532,7 @@ on_server_message(SoupWebsocketConnection* conn,
 	if(!error == NULL || object == NULL) {return;}
 
     gchar* RequestType =    json_object_get_string_member(object, "RequestType");
-    gint SubjectId =      json_object_get_int_member(object, "SubjectId");
+    gint SubjectId =        json_object_get_int_member(object, "SubjectId");
     gchar* Content =        json_object_get_string_member(object, "Content");
     gchar* Result =         json_object_get_string_member(object, "Result");
     g_print(Content);
@@ -557,10 +548,6 @@ on_server_message(SoupWebsocketConnection* conn,
     /*this is websocket message with signalling server and has nothing to do with 
     * json message format use to communicate with other module
     */
-    if (!g_strcmp0(RequestType , "SLAVEREQUEST"))
-    {
-        on_registering_message(core);
-    }
     else if (!g_strcmp0(RequestType, "OFFER_SDP"))
     {
         on_sdp_exchange(Content, core);

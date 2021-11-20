@@ -133,6 +133,14 @@ server_callback (SoupServer        *server,
 	soup_message_headers_iter_init (&iter, msg->request_headers);
 	while (soup_message_headers_iter_next (&iter, &name, &value))
 	{
+		if(!g_strcmp0(uri->path,"/ping"))
+		{
+			gchar* response = "ping";
+			soup_message_set_response(msg,
+				"application/text",SOUP_MEMORY_COPY,response,strlen(response));
+			msg->status_code = SOUP_STATUS_OK;
+			return;
+		}
 		if(!g_strcmp0(name,"Authorization") &&
 		   !g_strcmp0(value,agent->token))
 		{

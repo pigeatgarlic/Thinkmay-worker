@@ -32,6 +32,6 @@ endif()
 
 set(SHARED_ITEMS ${CMAKE_SOURCE_DIR}/shared-items/include)
 
-add_subdirectory(shared-items)
+# add_subdirectory(shared-items)
 add_subdirectory(session-core)
 add_subdirectory(agent)

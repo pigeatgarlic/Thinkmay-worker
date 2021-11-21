@@ -86,7 +86,7 @@ server_callback (SoupServer        *server,
 	soup_message_headers_iter_init (&iter, msg->request_headers);
 	while (soup_message_headers_iter_next (&iter, &name, &value))
 	{
-		if(!g_strcmp0(uri->path,"/ping"))
+		if(!g_strcmp0(uri->path,"/cluster/ping"))
 		{
 			gchar* response = "ping";
 			soup_message_set_response(msg,
@@ -97,7 +97,7 @@ server_callback (SoupServer        *server,
 		if(!g_strcmp0(name,"Authorization") &&
 		   !g_strcmp0(value,core->token))
 		{
-			if(!g_strcmp0(uri->path,"/agent/Initialize"))
+			if(!g_strcmp0(uri->path,"/agent/Message"))
 			{
 
 				msg->status_code = SOUP_STATUS_OK;

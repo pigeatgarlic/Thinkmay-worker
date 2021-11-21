@@ -239,18 +239,6 @@ on_ice_gathering_state_notify(GstElement* webrtcbin,
 }
 
 
-/// <summary>
-/// register with server by sending SLAVEREQUEST +{hub_id}
-/// </summary>
-/// <param name="core"></param>
-/// <returns></returns>
-gboolean
-register_with_server(SessionCore* core)
-{
-    worker_log_output("registering with signalling server");
-    send_message_to_signalling_server(hub,SLAVE_REQUEST, SESSION_ACCEPTED);
-    return TRUE;
-}
 
 
 /// <summary>
@@ -575,17 +563,13 @@ on_server_connected(SoupSession* session,
 
     
     hub->connection = soup_session_websocket_connect_finish(session, res, &error);
-    if (!error == NULL || hub->connection == NULL) 
-    {
-        session_core_finalize(core, error);
-    }
+    if (!error == NULL || hub->connection == NULL) { session_core_finalize(core, error); }
 
     worker_log_output("connected with signalling server");
     g_signal_connect(hub->connection, "closed", G_CALLBACK(on_server_closed), core);
     g_signal_connect(hub->connection, "message", G_CALLBACK(on_server_message), core);
 
     // register to server after connect to signalling servẻ  
-    register_with_server(core);
     return;
 }
 

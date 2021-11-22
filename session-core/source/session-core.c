@@ -49,7 +49,7 @@ void	   server_callback (SoupServer        *server,
 static void
 session_core_setup_session(SessionCore* self)
 {
-	pipeline_set_state(self->pipe, PIPELINE_READY);
+
 	worker_log_output("session core setup done");
 }
 
@@ -139,11 +139,6 @@ session_core_connect_signalling_server(SessionCore* self)
 	connect_to_websocket_signalling_server_async(self);
 }
 
-void
-session_core_setup_pipeline(SessionCore* self)
-{
-	setup_pipeline(self);
-}				
 
 
 

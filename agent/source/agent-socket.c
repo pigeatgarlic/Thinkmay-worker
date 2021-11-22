@@ -71,16 +71,14 @@ send_message_to_host(AgentServer* object,
 
     if(socket->token)
     {
-        SoupMessageBody* body = soupMessage->request_body;
         soup_message_headers_append(soupMessage->request_headers,"Authorization",socket->token);
-        soup_message_body_append_take(body,message,strlen(message));
+        soup_message_set_request(soupMessage,"application/text",SOUP_MEMORY_COPY,message,strlen(message));
         soup_session_send_message(socket->session,soupMessage);
     }
     else
     {
-        SoupMessageBody* body = soupMessage->request_body;
-        soup_message_body_append_take(body,message,strlen(message));
-        soup_session_send_async(socket->session,soupMessage,NULL,(GAsyncReadyCallback)get_worker_token,object);
+        soup_message_set_request(soupMessage,"application/text",SOUP_MEMORY_COPY,message,strlen(message));
+        soup_session_send_async(socket->session,soupmessage,null,(gasyncreadycallback)get_worker_token,object);
     }
 }
 

@@ -76,8 +76,6 @@ enum
 
 struct _Pipeline
 {
-    PipelineState state;
-
 	GstElement* pipeline;
 	GstElement* webrtcbin;
 
@@ -91,13 +89,9 @@ struct _Pipeline
 Pipeline*
 pipeline_initialize(SessionCore* core)
 {
-    SignallingHub* hub = session_core_get_signalling_hub(core);
-
     static Pipeline pipeline;
     memset(&pipeline,0,sizeof(pipeline));
-    
 
-    pipeline.state = PIPELINE_NOT_READY;
     return &pipeline;
 }
 

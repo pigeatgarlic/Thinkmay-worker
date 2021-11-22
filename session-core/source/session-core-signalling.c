@@ -439,13 +439,6 @@ on_sdp_exchange(gchar* data,
         report_session_core_error(core, SIGNALLING_ERROR);
         return;
     }
-    if (!g_strcmp0(sdptype, "request"))
-    {
-        Pipeline* pipe = session_core_get_pipeline(core);
-        pipeline_initialize(core);
-        session_core_setup_pipeline(core);
-        return;
-    }
 
 
     text = json_object_get_string_member(child, "sdp");
@@ -520,18 +513,7 @@ on_server_message(SoupWebsocketConnection* conn,
 	if(!error == NULL || object == NULL) {return;}
 
     gchar* RequestType =    json_object_get_string_member(object, "RequestType");
-    gint SubjectId =        json_object_get_int_member(object, "SubjectId");
     gchar* Content =        json_object_get_string_member(object, "Content");
-    gchar* Result =         json_object_get_string_member(object, "Result");
-    g_print(Content);
-
-    if (!g_strcmp0(Result, "SESSION_REJECTED") || !g_strcmp0(Result, "SESSION_TIMEOUT"))
-    {
-        GError error;
-        error.message = "Session has been rejected, this may due to security attack or signalling failure";
-        session_core_finalize( core,  &error);
-    }
-
 
     /*this is websocket message with signalling server and has nothing to do with 
     * json message format use to communicate with other module
@@ -544,9 +526,9 @@ on_server_message(SoupWebsocketConnection* conn,
     {
         on_ice_exchange(Content, core);
     }
-    else
+    else if (!g_strcmp0(RequestType, "REQUEST_STREAM"))
     {
-        report_session_core_error(core, UNKNOWN_MESSAGE);
+        setup_pipeline(core);
     }
     g_object_unref(parser);
     g_free(text);

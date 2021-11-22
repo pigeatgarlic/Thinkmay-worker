@@ -129,9 +129,9 @@ create_new_child_process(gchar* process_name,
     child_process->handler = handler;
     child_process->process = g_subprocess_new(G_SUBPROCESS_FLAGS_STDERR_PIPE | 
                                               G_SUBPROCESS_FLAGS_STDOUT_PIPE,
-                                              &error,POWERSHELL_BINARY,NULL);
+                                              &error,process_name,NULL);
     if(error)        
-        return NULL;
+        return;
     child_process->process_stderr = g_subprocess_get_stderr_pipe(child_process->process);
     child_process->process_stdout = g_subprocess_get_stdout_pipe(child_process->process);
 

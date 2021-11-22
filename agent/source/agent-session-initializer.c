@@ -123,6 +123,11 @@ session_initialize(AgentServer* agent)
         (ChildStdErrHandle)handle_session_core_error,
         (ChildStdOutHandle)handle_session_core_output,
         (ChildStateHandle)handler_session_core_state_function, agent,NULL);
+    
+    if(session->process == NULL)
+        return FALSE;
+    else    
+        return TRUE;
 }
 
 gboolean

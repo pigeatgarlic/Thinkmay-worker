@@ -122,45 +122,25 @@ server_callback (SoupServer        *server,
 			msg->status_code = SOUP_STATUS_OK;
 			return;
 		}
-		// if(!g_strcmp0(name,"Authorization") &&
-		//    !g_strcmp0(value,TOKEN))
+		// if(!g_strcmp0(name,"Authorization") && !g_strcmp0(value,TOKEN))
 		// {
-			if(!g_strcmp0(uri->path,"/cluster/Initialize"))
-			{
-				if(session_initialize(agent))
-					msg->status_code = SOUP_STATUS_OK;
-				else
-					msg->status_code = SOUP_STATUS_BAD_REQUEST;
+			if(!g_strcmp0(uri->path,"/cluster/Initialize")) {
+				msg->status_code = session_initialize(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
 			}
-			else if(!g_strcmp0(uri->path,"/cluster/Disconnect"))
-			{
-				if(session_disconnect(agent))
-					msg->status_code = SOUP_STATUS_OK;
-				else
-					msg->status_code = SOUP_STATUS_BAD_REQUEST;
+			else if(!g_strcmp0(uri->path,"/cluster/Disconnect")) {
+				msg->status_code = session_disconnect(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
 			}
-			else if(!g_strcmp0(uri->path,"/cluster/Reconnect"))
-			{
-				if(session_reconnect(agent))
-					msg->status_code = SOUP_STATUS_OK;
-				else
-					msg->status_code = SOUP_STATUS_BAD_REQUEST;
+			else if(!g_strcmp0(uri->path,"/cluster/Reconnect")) {
+				msg->status_code = session_reconnect(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
 			}
-			else if(!g_strcmp0(uri->path,"/cluster/Terminate"))
-			{
-				if(session_terminate(agent))
-					msg->status_code = SOUP_STATUS_OK;
-				else
-					msg->status_code = SOUP_STATUS_BAD_REQUEST;
+			else if(!g_strcmp0(uri->path,"/cluster/Terminate")) {
+				msg->status_code = session_terminate(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
 			}
-			else if(!g_strcmp0(uri->path,"/cluster/Shell"))
-			{
+			else if(!g_strcmp0(uri->path,"/cluster/Shell")) {
 				initialize_shell_session(agent,msg);
 			}
-			return;
 		// }
 	}
-	msg->status_code = SOUP_STATUS_UNAUTHORIZED;
 }
 
 

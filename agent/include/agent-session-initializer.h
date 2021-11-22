@@ -41,21 +41,20 @@ gboolean 			session_terminate   							(AgentServer* object);
 /// </summary>
 /// <param name="object"></param>
 /// <returns></returns>
-gboolean			remote_control_disconnect						(AgentServer* object);
+gboolean			session_disconnect								(AgentServer* object);
 
 /// <summary>
 /// initialize remote control based on session structure in agent_object
 /// </summary>
 /// <param name="object"></param>
 /// <returns></returns>
-gboolean			remote_control_reconnect						(AgentServer* object);
+gboolean			session_reconnect								(AgentServer* object);
 
 /// <summary>
 /// 
 /// </summary>
 /// <param name="agent"></param>
-RemoteSession*		intialize_remote_session_service				(AgentServer* agent,
-                                 								     gchar* session_core_port);
+RemoteSession*		intialize_remote_session_service				();
 
 /// <summary>
 /// 

@@ -48,7 +48,7 @@ gboolean                                register_with_host                  (Age
 /// </summary>
 /// <param name="self"></param>
 /// <param name="message"></param>
-void 									send_message_to_host				(AgentServer* self,
+gboolean								send_message_to_host				(AgentServer* self,
                                                                              gchar* data);
 
 /// <summary>
@@ -79,8 +79,7 @@ gpointer                                update_device_with_host             (Age
 /// </summary>
 /// <param name="host_url"></param>
 /// <returns>Socket correspond to host url</returns>
-Socket*                                 initialize_socket                   (gchar* token,
-																			 gchar* manager_ip);
+Socket*                                 initialize_socket                   ();
 
 /// <summary>
 /// close socket, this should be used after agent termination signal is send

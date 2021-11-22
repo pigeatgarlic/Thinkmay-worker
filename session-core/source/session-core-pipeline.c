@@ -510,18 +510,7 @@ pipeline_get_pipline(Pipeline* pipe)
     return pipe->pipeline;
 }
 
-PipelineState
-pipeline_get_state(Pipeline* pipe)
-{
-    return pipe->state;
-}
 
-void
-pipeline_set_state(Pipeline* pipe,
-                    PipelineState state)
-{
-    pipe->state = state;
-}
 
 GstElement*
 pipeline_get_video_encoder(Pipeline* pipe, Codec video)

@@ -6,6 +6,7 @@
 #include <logging.h>
 #include <error-code.h>
 #include <signalling-message.h>
+#include <global-var.h>
 
 #include <gst/gst.h>
 #include <glib-2.0/glib.h>
@@ -35,11 +36,6 @@ struct _SignallingHub
     /// it encapsulate signalling url and disable ssl option
     /// </summary>
     SoupSession* session;
-
-    /// <summary>
-    /// 
-    /// </summary>
-	gboolean disable_ssl;
 
     /// <summary>
     /// 
@@ -354,17 +350,16 @@ connect_to_websocket_signalling_server_async(SessionCore* core)
     SoupLogger* logger;
     SoupMessage* message;
 
-    const char* https_aliases[] = { "ws", NULL };
+    const char* https_aliases[] = { "wss", NULL };
     JsonObject* json_object;
 
     SignallingHub* hub = session_core_get_signalling_hub(core);
-
     gchar* text;
 
 
 
     hub->session =
-        soup_session_new_with_options(SOUP_SESSION_SSL_STRICT, !hub->disable_ssl,
+        soup_session_new_with_options(SOUP_SESSION_SSL_STRICT, TRUE,
             SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
             //SOUP_SESSION_SSL_CA_FILE, "/etc/ssl/certs/ca-bundle.crt",
             SOUP_SESSION_HTTPS_ALIASES, https_aliases, NULL);
@@ -373,7 +368,7 @@ connect_to_websocket_signalling_server_async(SessionCore* core)
 
     GString* request_uri = g_string_new(hub->signalling_server);
     g_string_append(request_uri,"?token=");
-    g_string_append(request_uri,session_core_get_token(core));
+    g_string_append(request_uri,TOKEN);
     gchar* request_string = g_string_free(request_uri,FALSE);
 
     message = soup_message_new(SOUP_METHOD_GET, request_string);
@@ -518,7 +513,7 @@ on_server_message(SoupWebsocketConnection* conn,
     /*this is websocket message with signalling server and has nothing to do with 
     * json message format use to communicate with other module
     */
-    else if (!g_strcmp0(RequestType, "OFFER_SDP"))
+    if (!g_strcmp0(RequestType, "OFFER_SDP"))
     {
         on_sdp_exchange(Content, core);
     }

@@ -3,58 +3,32 @@
 
 #include <gst/gst.h>
 #include <glib-2.0/glib.h>
+#include <global-var.h>
 
 #define GST_USE_UNSTABLE_API
 
 #define GST_DEBUG       4
 
 
-static gint agent_port = 2520;
-static gint session_core_port = 2250;
-static gint worker_manager_port = 5220;
-static gchar worker_ip[20] = "192.168.1.12";
-
-static gchar signalling_url[50] = "wss://host.thinkmay.net/Handshake";
-static gchar turn[100] = "turn://thinkmaycoturn:thinkmaycoturn_password@turn:stun.thinkmay.net:3478";
-
-static gint  session_id = 0;
-
-static gchar video_codec[50] = {0};
-static gchar audio_codec[50] = {0}; 
-
-static gchar connection_string[200] = {0};
-
-static gint  screen_width = 1920;
-static gint  screen_height = 1080;
 
 
 static GOptionEntry entries[] = {
-  {"agentport", 0, 0, G_OPTION_ARG_INT, &agent_port,
+  {"agentport", 0, 0, G_OPTION_ARG_INT, &AGENT_PORT,
       "String ID of the peer to connect to", "ID"},
-  {"sessioncoreport", 0, 0, G_OPTION_ARG_INT, &session_core_port,
+  {"sessioncoreport", 0, 0, G_OPTION_ARG_INT, &SESSION_CORE_PORT,
       "Signalling server to connect to", "URL"},
-  {"managerport", 0, 0, G_OPTION_ARG_INT, &worker_manager_port,
+  {"clusterip", 0, 0, G_OPTION_ARG_INT, &CLUSTER_IP,
       "Signalling server to connect to", "URL"},
-  {"workerip", 0, 0, G_OPTION_ARG_STRING, &worker_ip,
-      "Request that the peer generate the offer and we'll answer", "URL"},  
-  {"sessionid", 0, 0, G_OPTION_ARG_INT, &session_id,
-      "String ID of the peer to connect to", "ID"},
-  {"signalling", 0, 0, G_OPTION_ARG_STRING, &signalling_url,
+  {"token", 0, 0, G_OPTION_ARG_STRING, &TOKEN,
       "Signalling server to connect to", "URL"},
-  {"turn", 0, 0, G_OPTION_ARG_STRING, &turn,
-      "Request that the peer generate the offer and we'll answer", "URL"},
-  {"audiocodec", 0, 0, G_OPTION_ARG_STRING, &audio_codec,
-      "audio codec use for decode bin", "codec"},
-  {"videocodec", 0, 0, G_OPTION_ARG_STRING, &video_codec,
-      "video codec use for decode bin", "codec"},
-  {"connection", 0, 0, G_OPTION_ARG_STRING, &connection_string,
-      "connection ", "codec"},
   {NULL},
 };
 
 int
 main(int argc, char* argv[])
 {
+    default_var();
+
     GOptionContext *context;
     GError *error = NULL;
 
@@ -65,6 +39,7 @@ main(int argc, char* argv[])
         g_printerr ("Error initializing: %s\n", error->message);
         return -1;
     }
+    g_print(TOKEN);
 
     session_core_initialize();
 

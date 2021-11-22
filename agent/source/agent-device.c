@@ -1,3 +1,4 @@
+#include <winsock2.h>
 #include <agent-device.h>
 #include <agent-server.h>
 
@@ -5,10 +6,63 @@
 #include <message-form.h>
 
 #include <json-glib/json-glib.h>
+#ifdef G_OS_WIN32
+#include <stdio.h>
+#include <stdlib.h>
+#include <iphlpapi.h>
+
 #define DIV 1048576
 #define ID  0
+#pragma comment(lib, "IPHLPAPI.lib")
+
+#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
+#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 
 
+
+gchar* 
+get_local_ip()
+{
+	gchar* ip_address;
+    PIP_ADAPTER_INFO pAdapterInfo;
+    PIP_ADAPTER_INFO pAdapter = NULL;
+    DWORD dwRetVal = 0;
+    UINT i;
+
+/* variables used to print DHCP time info */
+    struct tm newtime;
+    char buffer[32];
+    errno_t error;
+
+    ULONG ulOutBufLen = sizeof (IP_ADAPTER_INFO);
+    pAdapterInfo = (IP_ADAPTER_INFO *) MALLOC(sizeof (IP_ADAPTER_INFO));
+    if (pAdapterInfo == NULL) {
+        printf("Error allocating memory needed to call GetAdaptersinfo\n");
+        return 1;
+    }
+// Make an initial call to GetAdaptersInfo to get
+// the necessary size into the ulOutBufLen variable
+    if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW) {
+        FREE(pAdapterInfo);
+        pAdapterInfo = (IP_ADAPTER_INFO *) MALLOC(ulOutBufLen);
+        if (pAdapterInfo == NULL) {
+            printf("Error allocating memory needed to call GetAdaptersinfo\n");
+            return 1;
+        }
+    }
+
+    if ((dwRetVal = GetAdaptersInfo(pAdapterInfo, &ulOutBufLen)) == NO_ERROR) {
+        pAdapter = pAdapterInfo;
+        ip_address = pAdapter->IpAddressList.IpAddress.String;
+    } else {
+        printf("GetAdaptersInfo failed with error: %d\n", dwRetVal);
+
+    }
+    if (pAdapterInfo)
+        FREE(pAdapterInfo);
+
+    return ip_address;
+}
 
 
 
@@ -24,14 +78,9 @@ struct _DeviceInformation
 	gchar gpu[512];
 	gint ram_capacity;
 	gchar OS[100];
+	gchar IP[100];
 };
 
-struct _DeviceState
-{
-	gint cpu_usage;
-	gint gpu_usage;
-	gint ram_usage;
-};
 
 
 
@@ -45,7 +94,6 @@ struct _DeviceState
 DeviceInformation*
 get_device_information() 
 {
-#ifdef G_OS_WIN32
 
 	DeviceInformation* device_info = malloc(sizeof(DeviceInformation));
 	memset(device_info,0, sizeof(DeviceInformation));
@@ -108,11 +156,13 @@ get_device_information()
 
 
 
+	gchar* ip = get_local_ip();
 	memcpy(device_info->OS , &OS,strlen(OS));
-#endif 
+	memcpy(device_info->IP,ip,strlen(ip));
 
 	return device_info;
 }
+#endif 
 
 
 gchar*
@@ -124,6 +174,7 @@ get_registration_message()
 	json_object_set_string_member(information,	"CPU", infor->cpu);
 	json_object_set_string_member(information,	"GPU", infor->gpu);
 	json_object_set_string_member(information,	"OS", infor->OS);
+	json_object_set_string_member(information,	"PrivateIP", infor->IP);
 	json_object_set_int_member(information,		"RAMcapacity", infor->ram_capacity);
 
 	return get_string_from_json_object(information);

@@ -13,10 +13,10 @@
 #include <libsoup/soup.h>
 #include <glib-2.0/glib/gstdio.h>
 
-#include <child-process-constant.h>
 #include <logging.h>
 #include <error-code.h>
 #include <message-form.h>
+#include <global-var.h>
 
 /// <summary>
 /// agent object 
@@ -42,21 +42,6 @@ struct _AgentServer
 	/// 
 	/// </summary>
 	RemoteSession* remote_session;
-
-	/// <summary>
-	/// 
-	/// </summary>
-	gchar* token;
-
-	/// <summary>
-	/// 
-	/// </summary>
-	gchar* cluster_url;
-
-	/// <summary>
-	/// 
-	/// </summary>
-	gchar* worker_ip;
 };
 
 
@@ -88,25 +73,21 @@ init_agent_server()
 	soup_server_add_handler(agent_declare.server,
 		"/",server_callback,&agent_declare,NULL);
 
-	soup_server_listen_all(agent_declare.server,2250,0,&error);
+	gint port = atoi(AGENT_PORT);
+
+
+	soup_server_listen_all(agent_declare.server,port,SOUP_SERVER_LISTEN_IPV4_ONLY,&error);
 	if(error){g_printerr(error->message); return;}
 }
 
 
 AgentServer*
-agent_new(gint url, 
-		gchar* session_core_port, 
-		gchar* token, 
-		gchar* manager_url, 
-		gchar* worker_ip)
+agent_new()
 {	
 	GError* error = NULL;
 	agent_declare.server = init_agent_server();
-	agent_declare.token = token;
-	agent_declare.cluster_url = manager_url;
-	agent_declare.worker_ip = worker_ip;
-	agent_declare.socket = initialize_socket(token,manager_url);
-	agent_declare.remote_session = intialize_remote_session_service(&agent_declare,session_core_port);
+	agent_declare.socket = initialize_socket();
+	agent_declare.remote_session = intialize_remote_session_service();
 	if(!agent_declare.server){return;}
 	
 	register_with_host(&agent_declare);
@@ -141,32 +122,43 @@ server_callback (SoupServer        *server,
 			msg->status_code = SOUP_STATUS_OK;
 			return;
 		}
-		if(!g_strcmp0(name,"Authorization") &&
-		   !g_strcmp0(value,agent->token))
-		{
+		// if(!g_strcmp0(name,"Authorization") &&
+		//    !g_strcmp0(value,TOKEN))
+		// {
 			if(!g_strcmp0(uri->path,"/cluster/Initialize"))
 			{
-
+				if(session_initialize(agent))
+					msg->status_code = SOUP_STATUS_OK;
+				else
+					msg->status_code = SOUP_STATUS_BAD_REQUEST;
 			}
 			else if(!g_strcmp0(uri->path,"/cluster/Disconnect"))
 			{
-
+				if(session_disconnect(agent))
+					msg->status_code = SOUP_STATUS_OK;
+				else
+					msg->status_code = SOUP_STATUS_BAD_REQUEST;
 			}
 			else if(!g_strcmp0(uri->path,"/cluster/Reconnect"))
 			{
-
+				if(session_reconnect(agent))
+					msg->status_code = SOUP_STATUS_OK;
+				else
+					msg->status_code = SOUP_STATUS_BAD_REQUEST;
 			}
 			else if(!g_strcmp0(uri->path,"/cluster/Terminate"))
 			{
-
+				if(session_terminate(agent))
+					msg->status_code = SOUP_STATUS_OK;
+				else
+					msg->status_code = SOUP_STATUS_BAD_REQUEST;
 			}
 			else if(!g_strcmp0(uri->path,"/cluster/Shell"))
 			{
 				initialize_shell_session(agent,msg);
 			}
-			msg->status_code = SOUP_STATUS_OK;
 			return;
-		}
+		// }
 	}
 	msg->status_code = SOUP_STATUS_UNAUTHORIZED;
 }
@@ -183,39 +175,7 @@ agent_finalize(AgentServer* self)
 
 
 
-void
-agent_report_error(AgentServer* self,
-				   gchar* message)
-{
 
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*START get-set function*/
 
 
 
@@ -261,17 +221,3 @@ agent_set_remote_session(AgentServer* self,
 	self->remote_session = session;
 }
 
-gchar* 
-agent_get_token(AgentServer* self)
-{
-	return self->token;
-}
-
-void 
-agent_server_set_token(AgentServer* self,
-					   gchar* token)
-{
-	self->token = token;
-	socket_set_token(self->socket,token);
-
-}

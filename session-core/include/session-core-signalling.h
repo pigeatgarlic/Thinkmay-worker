@@ -72,12 +72,12 @@ SignallingHub*                  signalling_hub_initialize                       
 void                            connect_to_websocket_signalling_server_async            (SessionCore* core);
 
 /// <summary>
-/// reegister with server by sending session slave id
-/// </summary> 
-/// <param name="core"></param>
-/// <returns></returns>
-gboolean                        register_with_server                                    (SessionCore* core);
-
+/// 
+/// </summary>
+/// <param name="hub"></param>
+/// <param name="turn"></param>
+/// <param name="url"></param>
+/// <param name="session_slave_id"></param>
 void                            signalling_hub_setup                                    (SignallingHub* hub,
                                                                                         gchar* turn, 
                                                                                         gchar* url,
@@ -99,21 +99,6 @@ gboolean                        signalling_close                                
 /// <param name="hub"></param>
 /// <returns></returns>
 gchar*                          signalling_hub_get_turn_server                          (SignallingHub* hub);
-
-/// <summary>
-/// get peer call state from signalling server
-/// </summary>
-/// <param name="hub"></param>
-/// <returns></returns>
-PeerCallState                   signalling_hub_get_peer_call_state                      (SignallingHub* hub);
-
-SignallingServerState           signalling_hub_get_signalling_state                     (SignallingHub* hub);
-
-
-void                            signalling_hub_set_signalling_state                     (SignallingHub* hub,
-                                                                                        SignallingServerState state);
-
-
 
 
 #endif // !__SESSION_CORE_SIGNALLING_H

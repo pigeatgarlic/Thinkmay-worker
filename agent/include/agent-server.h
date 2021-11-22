@@ -85,11 +85,7 @@ void											agent_finalize						(AgentServer* object);
 /// <param name="Host_URL"></param>
 /// <param name="Host_ID"></param>
 /// <returns></returns>
-AgentServer*									agent_new							(gint agent_port,
-																					gchar* session_core_port,
-																					gchar* token, 
-																					gchar* manager_url,
-																					gchar* worker_ip);
+AgentServer*									agent_new							();
 
 /// <summary>
 /// handle message from host
@@ -140,25 +136,11 @@ void											agent_register_with_host			(AgentServer* self);
 void											agent_on_session_core_exit		(AgentServer* self);
 
 
-/// <summary>
-/// report error to host, included error message
-/// error then will be log into database and report to admin imediately
-/// </summary>
-/// <param name="self"></param>
-/// <param name="message">a short description about error</param>
-void											agent_report_error					(AgentServer* self,
-				   																	 gchar* message);
-
-
 /*get-set function for agent object*/
 Socket*											agent_get_socket					(AgentServer* self);
 
 
 
-AgentState*										agent_get_state						(AgentServer* self);
-
-void											agent_set_state						(AgentServer* self,
-																					 AgentState* state);
 
 void											agent_set_main_loop					(AgentServer* agent,
 																					 GMainLoop* loop);
@@ -183,8 +165,6 @@ void											agent_set_remote_session			(AgentServer* self,
 																					 RemoteSession* session);
 
 GMainLoop*										agent_get_main_loop					(AgentServer* self);
-
-gchar* 											agent_get_token						(AgentServer* self);
 
 void											agent_server_set_token				(AgentServer* self,
 																					 gchar* token);

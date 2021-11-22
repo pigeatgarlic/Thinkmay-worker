@@ -1,33 +1,30 @@
 #include <glib.h>
 #include <agent-server.h>
+#include <global-var.h>
 
 
 #include <gst/gst.h>
 #include <glib-2.0/glib.h>
+#include <libsoup/soup.h>
+#include <message-form.h>
 
 #define GST_DEBUG               4
 
 
-static gint agent_port = 2520;
-static gchar session_core_port[10] = "2250";
-static gchar worker_ip[20] = "192.168.1.12";
-static gchar manager_url[20] = "192.168.1.12";
-static gchar token[200] = {0}; 
-
-
-
 
 static GOptionEntry entries[] = {
-  {"token", 0, 0, G_OPTION_ARG_STRING, &token,
+  {"token", 0, 0, G_OPTION_ARG_STRING, &TOKEN,
       "token register with worker manager", "TOKEN"},
-  {"agentport", 0, 0, G_OPTION_ARG_INT, &agent_port,
+  {"agentport", 0, 0, G_OPTION_ARG_STRING, &AGENT_PORT,
       "String ID of the peer to connect to", "ID"},
-  {"sessioncoreport", 0, 0, G_OPTION_ARG_INT, &session_core_port,
+  {"coreport", 0, 0, G_OPTION_ARG_STRING, &SESSION_CORE_PORT,
       "Signalling server to connect to", "URL"},
-  {"managerurl", 0, 0, G_OPTION_ARG_STRING, &manager_url,
+  {"clusterip", 0, 0, G_OPTION_ARG_STRING, &CLUSTER_IP,
       "Signalling server to connect to", "URL"},
-  {"workerip", 0, 0, G_OPTION_ARG_STRING, &worker_ip,
-      "Request that the peer generate the offer and we'll answer", "URL"},
+  {"user", 0, 0, G_OPTION_ARG_STRING, &USER,
+      "thinkmay manager username", "URL"},
+  {"password", 0, 0, G_OPTION_ARG_STRING, &PASSWORD,
+      "thinkmay manager password", "URL"},
   {NULL},
 };
 
@@ -35,10 +32,12 @@ static GOptionEntry entries[] = {
 int
 main(int argc, char* argv[])
 {
+    default_var();
     GOptionContext *context;
     GError *error = NULL;
 
-    context = g_option_context_new ("- gstreamer webrtc sendrecv demo");
+
+    context = g_option_context_new ("- thinkmay agent ");
     g_option_context_add_main_entries (context, entries, NULL);
     g_option_context_add_group (context, gst_init_get_option_group ());
     if (!g_option_context_parse (context, &argc, &argv, &error)) {
@@ -46,10 +45,47 @@ main(int argc, char* argv[])
         return -1;
     }
 
-    agent_new(agent_port, 
-            session_core_port, 
-            token,
-            manager_url,
-            worker_ip);
+    const gchar* http_aliases[] = { "https", NULL };
+    SoupSession* session = soup_session_new_with_options(
+            SOUP_SESSION_SSL_STRICT, FALSE,
+            SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
+            SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
+    
+    if(!strlen(user))
+    {
+        g_print("Enter your thinkmay manager username:\n[USERNAME]: ");
+        scanf("%s", user);
+    }
+    if(!strlen(password))
+    {
+        g_print("Enter your thinkmay manager password:\n[PASSWORD]: ");
+        scanf("%s", password);
+    }
+
+    JsonObject* login = json_object_new();
+    json_object_set_string_member(login,"UserName",USER);
+    json_object_set_string_member(login,"Password",PASSWORD);
+    gchar* login_body = get_string_from_json_object(login);
+
+    gchar* uri = "https://host.thinkmay.net/Account/Login";
+
+
+
+    SoupMessage* message = soup_message_new(SOUP_METHOD_POST,uri);
+    soup_message_set_request(message,"application/json",SOUP_MEMORY_COPY,login_body,strlen(login_body));
+    soup_session_send_message(session,message);
+
+    JsonParser* parser = json_parser_new();
+    JsonObject* result_json = get_json_object_from_string(message->response_body->data,&error,parser);
+    gchar* token_result = json_object_get_string_member(result_json,"token");
+    g_object_unref(parser); 
+    if(!token_result) {
+        g_printerr("fail to login, retry\n");
+        return;
+    }
+
+    memcpy(TOKEN,token_result,strlen(token_result));
+    agent_new();
     return;
 }
+

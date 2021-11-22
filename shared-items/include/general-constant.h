@@ -10,11 +10,11 @@
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-#define SESSION_CORE_BINARY           ("session-core.exe ")
-#define AGENT_BINARY                  ("agent.exe ")
-#define FILE_TRANSCEIVER_BINARY       ("file-transfer.exe ")
-#define REMOTE_APP_BINARY             ("remote-app.exe ")
-#define POWERSHELL_BINARY             "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe "
+#define SESSION_CORE_BINARY           "session-core"
+#define AGENT_BINARY                  "./agent.exe"
+#define FILE_TRANSCEIVER_BINARY       "./file-transfer.exe"
+#define REMOTE_APP_BINARY             "./remote-app.exe"
+#define POWERSHELL_BINARY             "cmd"
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 

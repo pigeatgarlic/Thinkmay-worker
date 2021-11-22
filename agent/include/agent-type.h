@@ -6,7 +6,8 @@
 #include <json-glib/json-glib.h>
 #include <Windows.h>
 
-#define TERMINATED_PATH     22
+
+
 
 /// <summary>
 /// Socket is a object use to manage connection with host, 
@@ -14,11 +15,6 @@
 /// </summary>
 typedef struct _Socket 				Socket;
 
-/// <summary>
-/// device state is the hardware state of slave device 
-/// included gpu and ram usage
-/// </summary>
-typedef struct _DeviceState			DeviceState;
 
 /// <summary>
 /// device information use to register 
@@ -32,20 +28,10 @@ typedef struct _DeviceInformation 	DeviceInformation;
 typedef struct _AgentServer			AgentServer;
 
 /// <summary>
-/// Child pipe contain standard i/o pipe of child process of agent
-/// </summary>
-typedef struct _ChildPipe			ChildPipe;
-
-/// <summary>
 /// childprocess object abstract the existen of child process
 /// </summary>
 typedef	struct _ChildProcess		ChildProcess;
 
-/// <summary>
-/// state of slave device, use to manage session service state of the slave device
-/// and terminate session core.
-/// </summary>
-typedef struct _AgentState			AgentState;
 
 /// <summary>
 /// 
@@ -103,10 +89,5 @@ typedef void  (*ChildStdErrHandle)    (GBytes* buffer,
 typedef void  (*ChildStateHandle)  (ChildProcess* proc,
                                     AgentServer* agent,
                                     gpointer data);
-
-
-
-
-
 
 #endif

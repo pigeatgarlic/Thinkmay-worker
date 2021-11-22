@@ -38,7 +38,7 @@ struct _SessionCore
 static SessionCore core_declare;
 
 void	   server_callback (SoupServer        *server,
-							SoupMessage	   *msg,
+							SoupMessage	   	  *msg,
 							const char        *path,
 							GHashTable        *query,
 							gpointer           user_data);

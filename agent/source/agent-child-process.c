@@ -3,16 +3,14 @@
 #include <agent-server.h>
 
 
-#include <child-process-constant.h>
 #include <state-indicator.h>
 #include <logging.h>
-#include <child-process-constant.h>
 #include <error-code.h>
 
 #include <glib.h>
 
+#include <general-constant.h>
 #include <error-code.h>
-#include <child-process-constant.h>
 
 #define BUFSIZE 5000
 
@@ -131,7 +129,9 @@ create_new_child_process(gchar* process_name,
     child_process->handler = handler;
     child_process->process = g_subprocess_new(G_SUBPROCESS_FLAGS_STDERR_PIPE | 
                                               G_SUBPROCESS_FLAGS_STDOUT_PIPE,
-                                              &error,process_name,NULL);
+                                              &error,POWERSHELL_BINARY,NULL);
+    if(error)        
+        return NULL;
     child_process->process_stderr = g_subprocess_get_stderr_pipe(child_process->process);
     child_process->process_stdout = g_subprocess_get_stdout_pipe(child_process->process);
 

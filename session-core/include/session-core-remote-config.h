@@ -40,30 +40,6 @@ void			qoe_setup							(QoE* qoe,
 
 
 /// <summary>
-/// </summary>
-/// update current qoe metric parameter 
-/// (related to experience quality of the stream),
-/// then, adaptive bitrate algorithm will be applied (if available)
-/// <param name="core"></param>
-/// <param name="time"></param>
-/// <param name="framerate"></param>
-/// <param name="audio_latency"></param>
-/// <param name="video_latency"></param>
-/// <param name="audio_bitrate"></param>
-/// <param name="video_bitrate"></param>
-/// <param name="bandwidth"></param>
-/// <param name="packets_lost"></param>
-void			qoe_update_quality					(SessionCore* core,
-													 gint time,
-													 gint framerate,
-													 gint audio_latency,
-													 gint video_latency,
-													 gint audio_bitrate,
-													 gint video_bitrate,
-												     gint bandwidth,
-													 gint packets_lost);
-
-/// <summary>
 /// get audio codec from current remote session
 /// </summary>
 /// <param name="qoe"></param>

@@ -104,19 +104,10 @@ CoreState		session_core_get_state					(SessionCore* self);
 SignallingHub*	session_core_get_signalling_hub			(SessionCore* core);
 
 /// <summary>
-/// get ipc (inter process communication object from session core object)
-/// ipc object will be use to exchange data with agent object
-/// </summary>
-/// <param name="core"></param>
-/// <returns></returns>
-IPC*			session_core_get_ipc					(SessionCore* core);
-
-/// <summary>
 /// report session core error with server
 /// </summary> 
 /// <param name="self"></param>
 /// <param name="code"></param>
 void			report_session_core_error				(SessionCore* self,
 														 ErrorCode code);
-
 #endif 

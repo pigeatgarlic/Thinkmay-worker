@@ -76,8 +76,51 @@ handle_child_process_stderr(GInputStream* stream,
     proc->stderr_handler(output, proc, proc->agent,proc->data);
     g_bytes_unref(output);
 }
+#else
+
+
+
+void
+read_std_pipe_async(ChildProcess* proc, 
+                    HANDLE pipe, 
+                    ChildStdErrHandle handle)
+{
+    DWORD dwWritten = 0;
+    gchar buffer_stdout[500] = {0};
+    memset(buffer_stdout, 0, 500);
+    OVERLAPPED overlap;
+    overlap.Offset = 0;
+    overlap.OffsetHigh = 0;
+    ReadFile(pipe, buffer_stdout, 500, &dwWritten,NULL);
+    if(dwWritten && *buffer_stdout) {
+        GBytes* byte = g_bytes_new(buffer_stdout, strlen(buffer_stdout));
+        handle(byte, proc->agent, proc->data);
+    }
+    read_std_pipe_async(proc,pipe,handle);
+}
+void
+read_stdout_task(GTask* task,
+            gpointer source,
+            gpointer task_data,
+            GCancellable* cancellable)
+{
+    ChildProcess* proc = g_task_get_task_data(task);
+    read_std_pipe_async(proc, proc->process_stdout, proc->stdout_handler);
+}
+
+void
+read_stderr_task(GTask* task,
+                gpointer source,
+                gpointer task_data,
+                GCancellable* cancellable)
+{
+    ChildProcess* proc = g_task_get_task_data(task);
+    read_std_pipe_async(proc, proc->process_stderr, proc->stderr_handler);
+}
+
 
 #endif
+
 
 
 
@@ -85,6 +128,15 @@ static gpointer
 handle_child_process_state(gpointer data)
 {
     ChildProcess* proc = (ChildProcess*)data;
+    GCancellable* cancellabl = g_cancellable_new();
+
+    GTask* taskout = g_task_new(proc, cancellabl, NULL, NULL);
+    g_task_set_task_data(taskout, proc, NULL);
+    g_task_run_in_thread(taskout, (GTaskThreadFunc) read_stdout_task);
+    GTask* taskerr = g_task_new(proc, cancellabl, NULL, NULL);
+    g_task_set_task_data(taskerr, proc, NULL);
+    g_task_run_in_thread(taskerr, (GTaskThreadFunc)read_stderr_task);
+
     while (TRUE)
     {
 #ifndef G_OS_WIN32
@@ -101,47 +153,13 @@ handle_child_process_state(gpointer data)
             (GAsyncReadyCallback)handle_child_process_stdout,proc);
 #else
         DWORD code;
+        Sleep(100);
         GetExitCodeProcess(proc->process, &code);
         if(code != STILL_ACTIVE){
             proc->handler(proc,proc->agent,proc->data);
+            g_cancellable_cancel(cancellabl);
             return;
         }
-
-        
-        gchar* buffer_stderr = malloc(200);
-        gchar* buffer_stdout = malloc(200);
-        gchar* temp_err = buffer_stderr;
-        gchar* temp_out = buffer_stdout;
-
-        while(TRUE) {
-            DWORD result,dwWritten;
-            result = ReadFile(proc->process_stderr, temp_err, 1, &dwWritten, NULL);
-            if(result && dwWritten) {
-                if(!*temp_err)
-                    break;
-                else
-                    temp_err++;
-        }}
-        while(TRUE) {
-            DWORD result,dwWritten;
-            result = ReadFile(proc->process_stdout, temp_out, 1, &dwWritten, NULL);
-            if(result && dwWritten) {
-                if(!*temp_out)
-                    break;
-                else
-                    temp_out++;
-        }}
-
-        if(*buffer_stderr) {
-            GBytes* byte = g_bytes_new(buffer_stderr,strlen(buffer_stderr));
-            proc->stderr_handler(byte,proc->agent,proc->data);
-        } if(*buffer_stdout) {
-            GBytes* byte = g_bytes_new(buffer_stdout,strlen(buffer_stdout));
-            proc->stdout_handler(byte,proc->agent,proc->data);
-        }
-
-        free(buffer_stderr);
-        free(buffer_stdout);
 #endif
     }
 }
@@ -189,11 +207,12 @@ initialize_process_handle(ChildProcess* self,
     attr.bInheritHandle = TRUE;
     attr.lpSecurityDescriptor = NULL;
 
-    if (!CreatePipe(&self->process_stdout, &ret->standard_out, &attr, 0))
+    if (!CreatePipe(&self->process_stdout, &ret->standard_out, &attr, 500))
         return NULL;
-    if (!CreatePipe(&self->process_stderr, &ret->standard_err, &attr, 0))
+    if (!CreatePipe(&self->process_stderr, &ret->standard_err, &attr, 500))
         return NULL;
 
+    gchar i = "/xcc";
     SetHandleInformation(self->process_stderr, HANDLE_FLAG_INHERIT, 0);
     SetHandleInformation(self->process_stdout, HANDLE_FLAG_INHERIT, 0);
     return ret;
@@ -261,7 +280,8 @@ create_new_child_process(gchar* process_name,
         child_process->process = pi.hProcess;
 #endif
 
-    child_process->statehdl =   g_thread_new("handle",handle_child_process_state,child_process);
+    child_process->statehdl =   g_thread_new("handle",
+        handle_child_process_state,child_process);
     return child_process;
 }
 

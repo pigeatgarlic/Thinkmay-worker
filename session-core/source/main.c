@@ -39,7 +39,6 @@ main(int argc, char* argv[])
         g_printerr ("Error initializing: %s\n", error->message);
         return -1;
     }
-    g_print(TOKEN);
 
     session_core_initialize();
 

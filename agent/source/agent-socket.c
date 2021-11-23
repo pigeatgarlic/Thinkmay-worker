@@ -26,11 +26,10 @@ struct _Socket
 	/// <summary>
 	/// 
 	/// </summary>
-	gchar* cluster_url;
+	gchar cluster_url[50];
 };
 
 
-static Socket socket_declare = {0};
 
 
 
@@ -69,20 +68,22 @@ register_with_host(AgentServer* agent)
 /*START get-set-function for Socket*/
 
 Socket*
-initialize_socket(gchar* token)
+initialize_socket()
 {
+    Socket* socket = malloc(sizeof(Socket));
+    memset(socket,0,sizeof(Socket)); 
     const gchar* http_aliases[] = { "http", NULL };
 
     GString* string = g_string_new("http://");
     g_string_append(string,CLUSTER_IP);
     g_string_append(string,":2220");
+    gchar* url = g_string_free(string,FALSE);
 
-
-    socket_declare.cluster_url = g_string_free(string,FALSE);
-    socket_declare.session = soup_session_new_with_options(
+    memcpy( socket->cluster_url,url,strlen(url)); 
+    socket->session = soup_session_new_with_options(
             SOUP_SESSION_SSL_STRICT, FALSE,
             SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
             SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
 
-    return &socket_declare;
+    return socket;
 }

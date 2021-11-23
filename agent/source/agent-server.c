@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <libsoup/soup.h>
 #include <glib-2.0/glib/gstdio.h>
+#include <libsoup/soup.h>
 
 #include <logging.h>
 #include <error-code.h>
@@ -47,36 +48,73 @@ struct _AgentServer
 
 
 
-static AgentServer agent_declare = {0};
-
-
-void
+static void
 server_callback (SoupServer        *server,
                  SoupMessage	   *msg,
 		 		 const char        *path,
                  GHashTable        *query,
-		 		 gpointer           user_data);
+				 SoupClientContext *ctx,
+		 		 gpointer           user_data)
+{
+	char *file_path;
+	SoupMessageHeadersIter iter;
+	SoupMessageBody *request_body;
+	const char *name, *value;
+	AgentServer* agent = (AgentServer*)user_data;
+	SoupURI* uri = soup_message_get_uri(msg);
 
-void
-do_post (SoupServer *server, 
-		SoupMessage *msg, 
-		const char *path);
+	if(!g_strcmp0(uri->path,"/ping"))
+	{
+		gchar* response = "ping";
+		soup_message_set_response(msg, "application/json",SOUP_MEMORY_COPY,response,strlen(response));
+		soup_message_set_status(msg,SOUP_STATUS_OK);
+		return;
+	}
+
+	soup_message_headers_iter_init (&iter, msg->request_headers);
+	while (soup_message_headers_iter_next (&iter, &name, &value))
+	{
+		if(!g_strcmp0(name,"Authorization") && 
+		   !g_strcmp0(value,TOKEN))
+		{
+		}
+	}
+
+	if(!g_strcmp0(uri->path,"/cluster/Initialize")) {
+		msg->status_code = session_initialize(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
+	}
+	else if(!g_strcmp0(uri->path,"/cluster/Disconnect")) {
+		msg->status_code = session_disconnect(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
+	}
+	else if(!g_strcmp0(uri->path,"/cluster/Reconnect")) {
+		msg->status_code = session_reconnect(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
+	}
+	else if(!g_strcmp0(uri->path,"/cluster/Terminate")) {
+		msg->status_code = session_terminate(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
+	}
+	else if(!g_strcmp0(uri->path,"/cluster/Shell")) {
+		initialize_shell_session(agent,msg);
+	}
+}
+
+
+
+
+
 
 
 static SoupServer*
-init_agent_server()
+init_agent_server(AgentServer* agent)
 {
 	GError* error = NULL;
 	SoupServer* server = soup_server_new(NULL);
-	agent_declare.server = server;
+	agent->server = server;
 
-	soup_server_add_handler(agent_declare.server,
-		"/",server_callback,&agent_declare,NULL);
+	soup_server_add_handler(agent->server,"/",
+		(SoupServerCallback)server_callback,agent,NULL);
 
 	gint port = atoi(AGENT_PORT);
-
-
-	soup_server_listen_all(agent_declare.server,port,SOUP_SERVER_LISTEN_IPV4_ONLY,&error);
+	soup_server_listen_all(agent->server,port,0,&error);
 	if(error){g_printerr(error->message); return;}
 }
 
@@ -85,65 +123,19 @@ AgentServer*
 agent_new()
 {	
 	GError* error = NULL;
-	agent_declare.server = init_agent_server();
-	agent_declare.socket = initialize_socket();
-	agent_declare.remote_session = intialize_remote_session_service();
-	if(!agent_declare.server){return;}
+	AgentServer* agent = malloc(sizeof(AgentServer));
+	memset(agent,0,sizeof(AgentServer));
+
+	agent->remote_session = intialize_remote_session_service();
+	agent->socket = initialize_socket();
+	agent->server = init_agent_server(agent);
+	if(!agent->server){return;}
 	
-	register_with_host(&agent_declare);
-	agent_declare.loop = g_main_loop_new(NULL, FALSE);
-	g_main_loop_run(agent_declare.loop);
-	return &agent_declare;
+	register_with_host(agent);
+	agent->loop = g_main_loop_new(NULL, FALSE);
+	g_main_loop_run(agent->loop);
+	return agent;
 }
-
-
-void
-server_callback (SoupServer        *server,
-                 SoupMessage	   *msg,
-		 		 const char        *path,
-                 GHashTable        *query,
-		 		 gpointer           user_data)
-{
-	char *file_path;
-	SoupMessageHeadersIter iter;
-	SoupMessageBody *request_body;
-	const char *name, *value;
-	AgentServer* agent = (AgentServer*) user_data;
-	SoupURI* uri = soup_message_get_uri(msg);
-
-	soup_message_headers_iter_init (&iter, msg->request_headers);
-	while (soup_message_headers_iter_next (&iter, &name, &value))
-	{
-		if(!g_strcmp0(uri->path,"/ping"))
-		{
-			gchar* response = "ping";
-			soup_message_set_response(msg,
-				"application/text",SOUP_MEMORY_COPY,response,strlen(response));
-			msg->status_code = SOUP_STATUS_OK;
-			return;
-		}
-		// if(!g_strcmp0(name,"Authorization") && !g_strcmp0(value,TOKEN))
-		// {
-			if(!g_strcmp0(uri->path,"/cluster/Initialize")) {
-				msg->status_code = session_initialize(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
-			}
-			else if(!g_strcmp0(uri->path,"/cluster/Disconnect")) {
-				msg->status_code = session_disconnect(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
-			}
-			else if(!g_strcmp0(uri->path,"/cluster/Reconnect")) {
-				msg->status_code = session_reconnect(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
-			}
-			else if(!g_strcmp0(uri->path,"/cluster/Terminate")) {
-				msg->status_code = session_terminate(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
-			}
-			else if(!g_strcmp0(uri->path,"/cluster/Shell")) {
-				initialize_shell_session(agent,msg);
-			}
-		// }
-	}
-}
-
-
 
 
 void

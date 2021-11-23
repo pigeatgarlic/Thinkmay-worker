@@ -24,4 +24,6 @@ worker_log_output(gchar* text)
     SoupMessage* message = soup_message_new(SOUP_METHOD_POST,"http://192.168.1.12/Log");
     soup_message_set_request(message,"application/text",SOUP_MEMORY_COPY,text,strlen(text));
     soup_session_send(session,message,NULL,NULL);    
+    g_print(text);
+    g_print("\n");
 }                  

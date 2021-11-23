@@ -74,6 +74,7 @@ server_callback (SoupServer        *server,
                  SoupMessage	   *msg,
 		 		 const char        *path,
                  GHashTable        *query,
+				 SoupClientContext *ctx,
 		 		 gpointer           user_data)
 {
 	char *file_path;
@@ -99,7 +100,6 @@ server_callback (SoupServer        *server,
 		{
 			if(!g_strcmp0(uri->path,"/agent/Message"))
 			{
-
 				msg->status_code = SOUP_STATUS_OK;
 				return;
 			}

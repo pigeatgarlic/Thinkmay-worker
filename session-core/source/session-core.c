@@ -8,11 +8,12 @@
 #include <error-code.h>
 #include <module-code.h>
 #include <opcode.h>
+#include <logging.h>
+#include <message-form.h>
+#include <global-var.h>
 
 
 #include <glib.h>
-#include <logging.h>
-#include <message-form.h>
 
 
 struct _SessionCore
@@ -49,7 +50,60 @@ void	   server_callback (SoupServer        *server,
 static void
 session_core_setup_session(SessionCore* self)
 {
+    const char* http_aliases[] = { "http", NULL };
+	SoupSession* session = soup_session_new_with_options(
+			SOUP_SESSION_SSL_STRICT, FALSE,
+			SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
+			SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
+		
+	GString* signalling_url = g_string_new("http://");
+	g_string_append(signalling_url,CLUSTER_IP);
+	g_string_append(signalling_url,":80/session/signalling");
 
+	GString* turnstring= g_string_new("http://");
+	g_string_append(turnstring,	CLUSTER_IP);
+	g_string_append(turnstring,":80/session/turn");
+
+	GString* qoestring = g_string_new("http://");
+	g_string_append(turnstring,	CLUSTER_IP);
+	g_string_append(turnstring,":80/session/qoe");
+
+	gchar* signalling = g_string_free(signalling_url,FALSE);
+	gchar* turn = g_string_free(turnstring,FALSE);
+	gchar* qoe = g_string_free(qoestring,FALSE);
+
+	SoupMessage* signalling_message = soup_message_new(SOUP_METHOD_GET,signalling);
+	SoupMessage* turn_message = soup_message_new(SOUP_METHOD_GET,turn);
+	SoupMessage* qoe_message = soup_message_new(SOUP_METHOD_GET,qoe);
+
+
+	soup_message_headers_append(signalling_message->request_headers,"Authentication",TOKEN);
+	soup_message_headers_append(turn_message->request_headers,"Authentication",TOKEN);
+	soup_message_headers_append(qoe_message->request_headers,"Authentication",TOKEN);
+
+	soup_session_send_message(session,signalling_message);
+	soup_session_send_message(session,turn_message);
+	soup_session_send_message(session,qoe_message);
+
+	if(signalling_message->status_code == SOUP_STATUS_OK &&
+	   turn_message->status_code == SOUP_STATUS_OK &&
+	   qoe_message->status_code == SOUP_STATUS_OK)
+	{
+		signalling_hub_setup(self->hub,
+			turn_message->response_body->data,
+			signalling_message->response_body->data);
+
+		GError* error = NULL;
+		JsonParser* parser = json_parser_new();
+		qoe_setup(self->qoe , 
+			get_json_object_from_string(qoe_message->response_body->data,&error,parser));
+	}
+	else 
+	{
+		GError* error = g_error_new(1234,234,"fail to get session infor from cluster",NULL);
+		session_core_finalize(self,error);
+		return;
+	}
 	worker_log_output("session core setup done");
 }
 

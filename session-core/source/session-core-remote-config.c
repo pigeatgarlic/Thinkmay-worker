@@ -74,21 +74,18 @@ display_setting_get_and_set(gint* screen_width,
 
 void
 qoe_setup(QoE* qoe,
-		  gint screen_width,
-		  gint screen_height,
-		  Codec audio_codec,
-		  Codec video_codec,
-		  QoEMode qoe_mode)
+		  Message* request_result)
 {
-	display_setting_get_and_set(&screen_width,&screen_height);
+	
+	qoe->screen_width =  json_object_get_int_member(request_result,"ScreenWidth"),
+	qoe->screen_height =  json_object_get_int_member(request_result,"ScreenHeight"),
 
-	qoe->screen_width = screen_width;
-	qoe->screen_height = screen_height;
+	display_setting_get_and_set(&qoe->screen_width,&qoe->screen_height);
 
-	qoe->codec_audio = audio_codec;
-	qoe->codec_video = video_codec;
+	qoe->codec_audio = json_object_get_int_member(request_result,"AudioCodec");
+	qoe->codec_video = json_object_get_int_member(request_result,"VideoCodec");
 
-	qoe->mode = qoe_mode;
+	qoe->mode = json_object_get_int_member(request_result,"QoEMode");
 }
 
 

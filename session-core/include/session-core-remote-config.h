@@ -32,11 +32,7 @@ QoE*			qoe_initialize						();
 /// <param name="video_codec"></param>
 /// <param name="qoe_mode"></param>
 void			qoe_setup							(QoE* qoe,
-		  											gint screen_width,
-		  											gint screen_height,
-		  											Codec audio_codec,
-		  											Codec video_codec,
-		  											QoEMode qoe_mode);
+													 Message* request_result );
 
 
 /// <summary>

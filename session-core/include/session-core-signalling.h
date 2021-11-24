@@ -80,8 +80,7 @@ void                            connect_to_websocket_signalling_server_async    
 /// <param name="session_slave_id"></param>
 void                            signalling_hub_setup                                    (SignallingHub* hub,
                                                                                         gchar* turn, 
-                                                                                        gchar* url,
-                                                                                        gint session_slave_id);
+                                                                                        gchar* url);
 
 /// <summary>
 /// close websocket connection with signalling server 

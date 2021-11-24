@@ -90,8 +90,10 @@ session_reconnect(AgentServer* agent)
         return FALSE;
 
     GString* core_script = g_string_new(SESSION_CORE_BINARY);
-    g_string_append(core_script,"--token=");
+    g_string_append(core_script," --token=");
     g_string_append(core_script,TOKEN);
+    g_string_append(core_script," --clusterip=");
+    g_string_append(core_script,CLUSTER_IP);
 
 
     session->process =
@@ -139,6 +141,8 @@ session_initialize(AgentServer* agent)
     GString* core_script = g_string_new(SESSION_CORE_BINARY);
     g_string_append(core_script," --token=");
     g_string_append(core_script,TOKEN);
+    g_string_append(core_script," --clusterip=");
+    g_string_append(core_script,CLUSTER_IP);
 
     session->process =
     create_new_child_process(g_string_free(core_script,FALSE),
@@ -160,8 +164,6 @@ send_message_to_core(AgentServer* agent, gchar* buffer)
     SoupMessage* message = soup_message_new(SOUP_METHOD_POST,session->session_core_url);
     soup_message_headers_append(message->request_headers,"Authorization",TOKEN);
 
-    SoupMessageBody* body = message->request_body;
-    soup_message_body_append_take(body,buffer,strlen(buffer));
-    
-    soup_session_send(session->session,message,NULL,NULL);
+    soup_message_set_request(message,"application/text",SOUP_MEMORY_COPY,buffer,strlen(buffer)); 
+    soup_session_send_async(session->session,message,NULL,NULL,NULL);
 }

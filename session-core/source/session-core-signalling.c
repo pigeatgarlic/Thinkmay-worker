@@ -57,11 +57,8 @@ on_server_connected(SoupSession* session,
 SignallingHub*
 signalling_hub_initialize(SessionCore* core)
 {
-    static SignallingHub hub;
-
-    
-
-    return &hub;
+    SignallingHub* hub = malloc(sizeof(SignallingHub));
+    return hub;
 }
 
 
@@ -69,8 +66,7 @@ signalling_hub_initialize(SessionCore* core)
 void
 signalling_hub_setup(SignallingHub* hub, 
                      gchar* turn,
-                     gchar* url,
-                     gint session_slave_id)
+                     gchar* url)
 {
     hub->signalling_server = url;
     hub->turn = turn;

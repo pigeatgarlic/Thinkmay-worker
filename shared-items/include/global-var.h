@@ -9,12 +9,14 @@ const gchar*                      token ;
 const gchar*                      turn ; 
 const gchar*                      user ; 
 const gchar*                      password ; 
+const gchar*                      device_token ; 
 
 
 #define			AGENT_PORT 					agent_port
 #define			SESSION_CORE_PORT 			session_core_port
 #define			CLUSTER_IP 					cluster_ip 
 #define			TOKEN 						token
+#define			DEVICE_TOKEN                device_token 
 #define			TURN						turn
 #define         USER                        user 
 #define         PASSWORD                    password 

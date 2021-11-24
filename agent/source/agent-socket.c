@@ -43,7 +43,7 @@ send_message_to_host(AgentServer* object,
     Socket* socket = agent_get_socket(object);
     SoupMessage* soupMessage = soup_message_new(SOUP_METHOD_POST,socket->cluster_url);
 
-    soup_message_headers_append(soupMessage->request_headers,"Authorization",TOKEN);
+    soup_message_headers_append(soupMessage->request_headers,"Authorization",DEVICE_TOKEN);
     soup_message_set_request(soupMessage,"application/json",
         SOUP_MEMORY_COPY,message,strlen(message));
     soup_session_send_async(socket->session,soupMessage,NULL,NULL,NULL);
@@ -54,10 +54,27 @@ send_message_to_host(AgentServer* object,
 gboolean
 register_with_host(AgentServer* agent)
 {
+    GError* error = NULL;
+    Socket* socket = agent_get_socket(agent);
     worker_log_output("Registering with host");
+
     gchar* package = get_registration_message();
-    send_message_to_host(agent, package); 
-    return TRUE;     
+    SoupMessage* soupMessage = soup_message_new(SOUP_METHOD_POST,socket->cluster_url);
+
+    soup_message_headers_append(soupMessage->request_headers,"Authorization",TOKEN);
+    soup_message_set_request(soupMessage,"application/json", SOUP_MEMORY_COPY,package,strlen(package));
+
+    soup_session_send_message(socket->session,soupMessage);
+
+    JsonParser* parser = json_parser_new();
+    JsonObject* result_json = get_json_object_from_string(soupMessage->response_body->data,&error,parser);
+    gchar* token_result = json_object_get_string_member(result_json,"token");
+    g_object_unref(parser); 
+    if(!token_result) { return FALSE; }
+
+
+    memcpy(DEVICE_TOKEN,token_result,strlen(token_result));
+    return TRUE; 
 }
 
 

@@ -62,6 +62,7 @@ server_callback (SoupServer        *server,
 	const char *name, *value;
 	AgentServer* agent = (AgentServer*)user_data;
 	SoupURI* uri = soup_message_get_uri(msg);
+	gchar* token;
 
 	if(!g_strcmp0(uri->path,"/ping"))
 	{
@@ -74,9 +75,18 @@ server_callback (SoupServer        *server,
 	soup_message_headers_iter_init (&iter, msg->request_headers);
 	while (soup_message_headers_iter_next (&iter, &name, &value))
 	{
-		if(!g_strcmp0(name,"Authorization") && 
-		   !g_strcmp0(value,TOKEN))
+		if(!g_strcmp0(name,"Authorization"))
 		{
+			token = value;
+		}
+	}
+
+	if(!TOKEN)
+	{
+		if(g_strcmp0(value,TOKEN))
+		{
+			soup_message_set_status(msg,SOUP_STATUS_UNAUTHORIZED);
+			return;
 		}
 	}
 

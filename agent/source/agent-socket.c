@@ -1,3 +1,13 @@
+/**
+ * @file agent-socket.c
+ * @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
+ * @brief 
+ * @version 1.0
+ * @date 2021-12-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #include <agent-socket.h>
 #include <agent-type.h>
 #include <agent-session-initializer.h>

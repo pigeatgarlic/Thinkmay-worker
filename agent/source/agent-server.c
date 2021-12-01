@@ -1,4 +1,14 @@
-﻿#include <agent-server.h>
+﻿/**
+ * @file agent-server.c
+ * @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
+ * @brief 
+ * @version 1.0
+ * @date 2021-12-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+#include <agent-server.h>
 #include <agent-type.h>
 #include <agent-session-initializer.h>
 #include <agent-socket.h>

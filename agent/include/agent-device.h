@@ -1,3 +1,13 @@
+/**
+ * @file agent-device.h
+ * @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
+ * @brief 
+ * @version 1.0
+ * @date 2021-12-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #pragma once
 #ifndef __AGNET_DEVICE_H__
 #define __AGENT_DEVICE_H__
@@ -15,16 +25,14 @@
 #pragma comment(lib, "d3d9.lib")
 
 
-/// <summary>
-/// update device thread function,
-/// invoke during agent object initialization
-/// </summary>
-/// <param name="data"></param>
-/// <returns></returns>
-gpointer				update_device					(AgentServer* data);
 
 
 
+/**
+ * @brief Get the registration message object
+ * this function wrap around process of getting worker information
+ * @return gchar* registration message string 
+ */
 gchar*                  get_registration_message        ();
 
 

@@ -1,3 +1,13 @@
+/**
+ * @file agent-session-initializer.h
+ * @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
+ * @brief 
+ * @version 1.0
+ * @date 2021-12-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #ifndef __AGENT_SESSION_INITIALIZER_H__ 
 #define __AGENT_SESSION_INITIALIZER_H__ 
 
@@ -8,60 +18,55 @@
 #include <Windows.h>
 
 
-/// <summary>
-/// (ATOMIC function)
-/// send message to session core using standard input output (stdio)
-/// should only be used by send_message function
-/// </summary>
-/// <param name="self"></param>
-/// <param name="buffer"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * send message to session core 
+ * @param self 
+ * @param buffer 
+ * @return gboolean 
+ */
 gboolean			send_message_to_core							(AgentServer* self,
 																	 gchar* buffer);
 
-/// <summary>
-/// initialize session, include create std pipe and session core and session loader child process
-/// should be invoked when there is a request from host
-/// </summary>
-/// <param name="object"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * initialize session by create session core process
+ * @param object 
+ * @return gboolean 
+ */
 gboolean			session_initialize   							(AgentServer* object);
 
-/// <summary>
-/// terminate session, included termination of two child process and cleaning some garbagge
-/// and assign NULL value to session 
-/// </summary>
-/// <param name="object"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * terminate session by force stop session core process
+ * @param object 
+ * @return gboolean 
+ */
 gboolean 			session_terminate   							(AgentServer* object);
 
-/// <summary>
-/// disconnect remote control with user, unlike session terminate,
-/// disconnect process do not assign NULL to agent->session
-/// </summary>
-/// <param name="object"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * disconnect session by force exit session core
+ * @param object 
+ * @return gboolean 
+ */
 gboolean			session_disconnect								(AgentServer* object);
 
-/// <summary>
-/// initialize remote control based on session structure in agent_object
-/// </summary>
-/// <param name="object"></param>
-/// <returns></returns>
+
+/**
+ * @brief 
+ * reconnect session core by create session core process
+ * @param object 
+ * @return gboolean 
+ */
 gboolean			session_reconnect								(AgentServer* object);
 
-/// <summary>
-/// 
-/// </summary>
-/// <param name="agent"></param>
-RemoteSession*		intialize_remote_session_service				();
 
-/// <summary>
-/// 
-/// </summary>
-/// <param name="agent"></param>
-/// <param name="data"></param>
-void				setup_session									(AgentServer* agent, 
-																	 gchar* data);
+/**
+ * @brief 
+ * initlaize RemoteSession instance
+ * @return RemoteSession* 
+ */
+RemoteSession*		intialize_remote_session_service				();
 																	 
 #endif

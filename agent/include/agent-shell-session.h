@@ -1,16 +1,18 @@
-﻿/// <summary>
-/// @file agent-shell-sesion.h
-/// @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
-/// </summary>
-/// @version 1.0
-/// @date 2021-09-23
-/// 
-/// @copyright Copyright (c) 2021
-/// 
+﻿/**
+ * @file agent-shell-session.h
+ * @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
+ * @brief 
+ * @version 1.0
+ * @date 2021-12-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #ifndef __AGENT_SHELL_SESSION_H__
 #define __AGENT_SHELL_SESSION_H__
 
 #include <glib.h>
+#include <libsoup/soup.h>
 #include <agent-server.h>
 
 
@@ -18,50 +20,16 @@
 
 
 
-/// <summary>
-/// </summary>
-/// 
-/// <param name="session"></param>
-/// <returns></returns>
-gchar*				shell_session_get_output					(gint process_id);
-
-/// <summary>
-/// </summary>
-/// 
-/// <param name="session"></param>
-/// <returns></returns>
-gchar*				shell_session_get_script					(gint process_id);
 
 
-/// <summary>
-/// </summary>
-/// 
-/// <param name="agent"></param>
-/// <param name="data_string"></param>
+/**
+ * @brief 
+ * initlize shell session with message from cluster manager
+ * @param agent 
+ * @param message soup message from cluster manager
+ */
 void				initialize_shell_session					(AgentServer* agent,
-                    										     gchar* data_string);
-
-/// <summary>
-/// </summary>
-/// 
-/// <param name="process_id"></param>
-/// <returns></returns>
-gint				shell_session_get_id						(gint process_id);
-
-/// <summary>
-/// </summary>
-/// 
-/// <param name="process_id"></param>
-/// <returns></returns>
-gint				shell_session_get_model						(gint process_id);
-
-/// <summary>
-/// 
-/// </summary>
-/// <param name="agent"></param>
-/// <param name="process_id"></param>
-void				report_shell_session						(AgentServer* agent,
-                    											 gint process_id);
+                    										     SoupMessage* message);
 
 #endif
 

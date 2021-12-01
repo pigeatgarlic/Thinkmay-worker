@@ -1,12 +1,13 @@
-/// <summary>
-/// @file agent-shell-session.c
-/// @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
-/// </summary>
-/// @version 1.0
-/// @date 2021-11-19
-/// 
-/// @copyright Copyright (c) 2021
-/// 
+/**
+ * @file agent-shell-session.c
+ * @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
+ * @brief 
+ * @version 1.0
+ * @date 2021-12-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #include <agent-shell-session.h>
 #include <agent-type.h>
 #include <agent-child-process.h>

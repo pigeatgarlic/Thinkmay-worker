@@ -1,3 +1,13 @@
+/**
+ * @file session-core-signalling.c
+ * @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
+ * @brief 
+ * @version 1.0
+ * @date 2021-12-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #include <session-core-signalling.h>
 #include <session-core.h>
 #include <session-core-pipeline.h>
@@ -25,27 +35,37 @@
 
 struct _SignallingHub
 {
-    /// <summary>
-    /// websocket connection object encapsulate websocket connection between slave and signalling server,
-    /// we must provide message handler function.
-    /// </summary>
+    /**
+     * @brief 
+     * websocket connection instance to connect with signalling server
+     */
     SoupWebsocketConnection* connection;
 
-    /// <summary>
-    /// soup session represent a session between session core and signalling server,
-    /// it encapsulate signalling url and disable ssl option
-    /// </summary>
+    /**
+     * @brief 
+     * 
+     * soup session represent a session between session core and signalling server,
+     * it encapsulate signalling url and disable ssl option
+     */
     SoupSession* session;
 
-    /// <summary>
-    /// 
-    /// </summary>
+    /**
+     * @brief 
+     * 
+     */
     gchar* signalling_server;
 
-    /// <summary>
-    /// url of turn server
-    /// </summary>
+    /**
+     * @brief 
+     * turn connection with turn server
+     */
 	gchar* turn;
+
+    /**
+     * @brief 
+     * remote token use to establish connection with client
+     */
+    gchar* remote_token;
 };
 
 
@@ -54,6 +74,7 @@ on_server_connected(SoupSession* session,
     GAsyncResult* res,
     SessionCore* core);
 
+
 SignallingHub*
 signalling_hub_initialize(SessionCore* core)
 {
@@ -61,18 +82,15 @@ signalling_hub_initialize(SessionCore* core)
     return hub;
 }
 
-
-
 void
 signalling_hub_setup(SignallingHub* hub, 
                      gchar* turn,
-                     gchar* url)
+                     gchar* url,
+                     gchar* remote_token)
 {
     hub->signalling_server = url;
     hub->turn = turn;
 }
-
-
 
 
 void
@@ -134,16 +152,11 @@ send_sdp_to_peer(SessionCore* core,
     text = gst_sdp_message_as_text(desc->sdp);
     sdp = json_object_new();
 
-    if (desc->type == GST_WEBRTC_SDP_TYPE_OFFER) 
-    {
+    if (desc->type == GST_WEBRTC_SDP_TYPE_OFFER) {
         json_object_set_string_member(sdp, "type", "offer");
-    }
-    else if (desc->type == GST_WEBRTC_SDP_TYPE_ANSWER) 
-    {
+    } else if (desc->type == GST_WEBRTC_SDP_TYPE_ANSWER) {
         json_object_set_string_member(sdp, "type", "answer");
-    }
-    else 
-    {
+    } else {
         g_assert_not_reached();
     }
 
@@ -391,7 +404,7 @@ on_ice_exchange(gchar* text,SessionCore* core)
 
     GError* error = NULL;
     JsonParser* parser = json_parser_new();
-    Message* object = get_json_object_from_string(text,&error,parser);
+    JsonObject* object = get_json_object_from_string(text,&error,parser);
 	if(!error == NULL || object == NULL) {return;}
 
     const gchar* candidate;
@@ -414,7 +427,7 @@ on_sdp_exchange(gchar* data,
 
     GError* error = NULL;
     JsonParser* parser = json_parser_new();
-    Message* object = get_json_object_from_string(data,&error,parser);
+    JsonObject* object = get_json_object_from_string(data,&error,parser);
 	if(!error == NULL || object == NULL) {session_core_finalize(core,error);}
 
     gint ret;
@@ -500,7 +513,7 @@ on_server_message(SoupWebsocketConnection* conn,
 
     GError* error = NULL;
     JsonParser* parser = json_parser_new();
-    Message* object = get_json_object_from_string(text,&error,parser);
+    JsonObject* object = get_json_object_from_string(text,&error,parser);
 	if(!error == NULL || object == NULL) {return;}
 
     gchar* RequestType =    json_object_get_string_member(object, "RequestType");
@@ -509,16 +522,11 @@ on_server_message(SoupWebsocketConnection* conn,
     /*this is websocket message with signalling server and has nothing to do with 
     * json message format use to communicate with other module
     */
-    if (!g_strcmp0(RequestType, "OFFER_SDP"))
-    {
+    if (!g_strcmp0(RequestType, "OFFER_SDP")) {
         on_sdp_exchange(Content, core);
-    }
-    else if (!g_strcmp0(RequestType, "OFFER_ICE"))
-    {
+    } else if (!g_strcmp0(RequestType, "OFFER_ICE")) {
         on_ice_exchange(Content, core);
-    }
-    else if (!g_strcmp0(RequestType, "REQUEST_STREAM"))
-    {
+    } else if (!g_strcmp0(RequestType, "REQUEST_STREAM")) {
         setup_pipeline(core);
     }
     g_object_unref(parser);
@@ -546,6 +554,30 @@ on_server_connected(SoupSession* session,
     return;
 }
 
+void
+connect_signalling_handler(SessionCore* core)
+{
+    Pipeline* pipe = session_core_get_pipeline(core);
+    SignallingHub* hub = session_core_get_signalling_hub(core);
+    GstElement* webrtcbin = pipeline_get_webrtc_bin(pipe);
+
+    /* Add stun server */
+    g_object_set(webrtcbin, "stun-server", 
+       "stun://stun.thinkmay.net:3478", NULL);
+
+    g_signal_emit_by_name (webrtcbin, "add-turn-server", hub->turn, NULL);
+
+
+    /* This is the gstwebrtc entry point where we create the offer and so on. It
+     * will be called when the pipeline goes to PLAYING. */
+    g_signal_connect(webrtcbin, "on-negotiation-needed",
+        G_CALLBACK(on_negotiation_needed), core);
+    g_signal_connect(webrtcbin, "on-ice-candidate",
+        G_CALLBACK(send_ice_candidate_message), core);
+    g_signal_connect(webrtcbin, "notify::ice-gathering-state",
+        G_CALLBACK(on_ice_gathering_state_notify), core);
+}
+
 
 gboolean
 signalling_close(SignallingHub* hub)
@@ -567,5 +599,3 @@ signalling_hub_get_turn_server(SignallingHub* hub)
 {
     return hub->turn;
 }
-
-

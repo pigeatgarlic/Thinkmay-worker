@@ -16,72 +16,36 @@
 
 
 
-/// <summary>
-/// setup pipeline then start stream, 
-/// the stream will include audio and video
-/// </summary>
-/// <param name="core"></param>
-/// <returns></returns>
-gpointer			setup_pipeline					(SessionCore* core);
+/**
+ * @brief Set the up pipeline object
+ * setup pipeline, 
+ * this function wrap around element creating is property setup procedure
+ * @param core 
+ */
+void                setup_pipeline					(SessionCore* core);
 
-
-/// <summary>
-/// get GstElement pipeline of this pipeline
-/// </summary>
-/// <param name="pipeline"></param>
-/// <returns>pipeline element of </returns>
-GstElement*			pipeline_get_pipline			(Pipeline* pipeline);
-
-/// <summary>
-/// get webrtcbin element from pipeline
-/// </summary>
-/// <param name="pipeline"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * get webrtcbin element from pipeline, 
+ * webrtcbin is a special function used for handling webrtcb connection 
+ * @param pipeline 
+ * @return GstElement* 
+ */
 GstElement*			pipeline_get_webrtc_bin			(Pipeline* pipeline);
 
-/// <summary>
-/// initliaze pipeline,
-/// include assigning memory to pipeline
-/// </summary>
-/// <returns></returns>
+/**
+ * @brief 
+ * initialize pipeline object without setup the gstelement
+ * @param core 
+ * @return Pipeline* return to pipeline element
+ */
 Pipeline*			pipeline_initialize				(SessionCore* core);
 
-/// <summary>
-/// 
-/// </summary>
-/// <param name="pipe"></param>
-/// <returns></returns>
-PipelineState		pipeline_get_state				(Pipeline* pipe);
-
-/// <summary>
-/// set current state of pipeline
-/// </summary>
-/// <param name="pipe"></param>
-/// <param name="state"></param>
-void                pipeline_set_state              (Pipeline* pipe,
-                                                     PipelineState state);
-
-
-
-
-/// <summary>
-/// get audio encoder from pipeline
-/// </summary>
-/// <param name="pipe"></param>
-/// <param name="audio">audio codec of pipeline</param>
-/// <returns></returns>
-GstElement*         pipeline_get_audio_encoder      (Pipeline* pipe,
-                                                     Codec audio);
-
-/// <summary>
-/// get video encoder from pipeline
-/// </summary>
-/// <param name="pipe"></param>
-/// <param name="video">video codec</param>
-/// <returns></returns>
-GstElement*         pipeline_get_video_encoder      (Pipeline* pipe,
-                                                     Codec video);
-
-
+/**
+ * @brief 
+ * set worker pointer to on or off
+ * @param toggle 
+ * @param core 
+ */
 void                toggle_pointer                  (gboolean toggle, 
                                                      SessionCore* core);

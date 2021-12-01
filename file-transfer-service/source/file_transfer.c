@@ -130,9 +130,6 @@ report_file_transfer_error(FileTransferService* self,
 	json_object_set_string_member(obj,
 		"ErrorMessage",code);
 
-	Message* msg_host = message_init(CORE_MODULE,
-		HOST_MODULE, ERROR_REPORT, obj);
-
 }
 
 

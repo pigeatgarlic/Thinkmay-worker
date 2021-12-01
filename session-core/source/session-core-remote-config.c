@@ -1,12 +1,13 @@
-/// <summary>
-/// @file session-core-remote-config.c
-/// @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
-/// </summary>
-/// @version 1.0
-/// @date 2021-09-06
-/// 
-/// @copyright Copyright (c) 2021
-/// 
+/**
+ * @file session-core-remote-config.c
+ * @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
+ * @brief 
+ * @version 1.0
+ * @date 2021-12-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #include <session-core-remote-config.h>
 #include <session-core-type.h>
 #include <session-core-pipeline.h>
@@ -74,18 +75,21 @@ display_setting_get_and_set(gint* screen_width,
 
 void
 qoe_setup(QoE* qoe,
-		  Message* request_result)
+		  gint screen_width,
+		  gint screen_height,
+		  Codec audio_codec,
+		  Codec video_codec,
+		  QoEMode mode)
 {
 	
-	qoe->screen_width =  json_object_get_int_member(request_result,"ScreenWidth"),
-	qoe->screen_height =  json_object_get_int_member(request_result,"ScreenHeight"),
+	qoe->screen_width =  screen_width;
+	qoe->screen_height =  screen_height;
 
 	display_setting_get_and_set(&qoe->screen_width,&qoe->screen_height);
 
-	qoe->codec_audio = json_object_get_int_member(request_result,"AudioCodec");
-	qoe->codec_video = json_object_get_int_member(request_result,"VideoCodec");
-
-	qoe->mode = json_object_get_int_member(request_result,"QoEMode");
+	qoe->codec_audio = audio_codec;
+	qoe->codec_video = video_codec;
+	qoe->mode = mode;
 }
 
 

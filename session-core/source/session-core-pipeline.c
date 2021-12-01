@@ -1,4 +1,14 @@
-﻿#include <session-core-pipeline.h>
+﻿/**
+ * @file session-core-pipeline.c
+ * @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
+ * @brief 
+ * @version 1.0
+ * @date 2021-12-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+#include <session-core-pipeline.h>
 #include <session-core-type.h>
 #include <session-core-data-channel.h>
 #include <session-core-signalling.h>
@@ -350,35 +360,6 @@ on_incoming_stream (GstElement * webrtc, GstPad * pad, GstElement * pipe)
 
 
 
-/// <summary>
-/// connect webrtc bin to ice and sdp signal handler
-/// </summary>
-/// <param name="core"></param>
-static void
-connect_signalling_handler(SessionCore* core)
-{
-    Pipeline* pipe = session_core_get_pipeline(core);
-    SignallingHub* hub = session_core_get_signalling_hub(core);
-
-    /* Add stun server */
-    g_object_set(pipe->webrtcbin, "stun-server", 
-       "stun://stun.thinkmay.net:3478", NULL);
-
-    g_signal_emit_by_name (pipe->webrtcbin, "add-turn-server", 
-        signalling_hub_get_turn_server(hub), NULL);
-
-
-    /* This is the gstwebrtc entry point where we create the offer and so on. It
-     * will be called when the pipeline goes to PLAYING. */
-    g_signal_connect(pipe->webrtcbin, "on-negotiation-needed",
-        G_CALLBACK(on_negotiation_needed), core);
-    g_signal_connect(pipe->webrtcbin, "on-ice-candidate",
-        G_CALLBACK(send_ice_candidate_message), core);
-    g_signal_connect(pipe->webrtcbin, "notify::ice-gathering-state",
-        G_CALLBACK(on_ice_gathering_state_notify), core);
-    g_signal_connect(pipe->webrtcbin, "pad-added", 
-       G_CALLBACK(on_incoming_stream),pipe->pipeline);
-}
 
 
 
@@ -469,25 +450,22 @@ toggle_pointer(gboolean toggle, SessionCore* core)
 
 
 
-gpointer
+void
 setup_pipeline(SessionCore* core)
 {
     SignallingHub* signalling = session_core_get_signalling_hub(core);
     Pipeline* pipe = session_core_get_pipeline(core);
     QoE* qoe= session_core_get_qoe(core);
 
-
-
     setup_element_factory(core, 
         qoe_get_video_codec(qoe),
         qoe_get_audio_codec(qoe));
 
     connect_signalling_handler(core);
-    
     setup_element_property(core);
 
-
-
+    g_signal_connect(pipe->webrtcbin, "pad-added", 
+       G_CALLBACK(on_incoming_stream),pipe->pipeline);
     gst_element_change_state(pipe->pipeline, GST_STATE_READY);
     connect_data_channel_signals(core);
     start_pipeline(core);
@@ -504,11 +482,6 @@ pipeline_get_webrtc_bin(Pipeline* pipe)
     return pipe->webrtcbin;
 }
 
-GstElement*
-pipeline_get_pipline(Pipeline* pipe)
-{
-    return pipe->pipeline;
-}
 
 
 
@@ -531,12 +504,4 @@ pipeline_get_video_encoder(Pipeline* pipe, Codec video)
     return NULL;
 }
 
-GstElement*
-pipeline_get_audio_encoder(Pipeline* pipe, Codec audio)
-{
-    
-    if (audio == OPUS_ENC) { return pipe->audio_element[OPUS_ENCODER];}
-    else if (audio == AAC_ENC) { return pipe->audio_element[AAC_ENCODER];}
-    return NULL;
-}
 

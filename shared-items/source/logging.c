@@ -1,3 +1,13 @@
+/**
+ * @file logging.c
+ * @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
+ * @brief 
+ * @version 1.0
+ * @date 2021-12-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #include <glib.h>
 #include <logging.h>
 #include <gio/gio.h>
@@ -5,7 +15,6 @@
 
 #include <libsoup/soup.h>
 
-#include <message-form.h>
 
 
 

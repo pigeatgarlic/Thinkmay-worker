@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iphlpapi.h>
+#include <global-var.h>
 
 #define DIV 1048576
 #define ID  0
@@ -94,7 +95,6 @@ struct _DeviceInformation
 DeviceInformation*
 get_device_information() 
 {
-
 	DeviceInformation* device_info = malloc(sizeof(DeviceInformation));
 	memset(device_info,0, sizeof(DeviceInformation));
 
@@ -157,6 +157,7 @@ get_device_information()
 
 
 	gchar* ip = get_local_ip();
+
 	memcpy(device_info->OS , &OS,strlen(OS));
 	memcpy(device_info->IP,ip,strlen(ip));
 

@@ -23,80 +23,91 @@
 
 /*Used as webrtcbin callback function*/
 
-/// <summary>
-/// send ice candidate to peer through signalling server
-/// typically emitted when pipeline is set to PLAYING 
-/// </summary>
-/// <param name="webrtc"></param>
-/// <param name="mlineindex"></param>
-/// <param name="candidate"></param>
-/// <param name="core"></param>
+/**
+ * @brief 
+ * send ice candidate to webrtc peer
+ * @param webrtc 
+ * @param mlineindex 
+ * @param candidate 
+ * @param core 
+ */
 void                            send_ice_candidate_message                              (GstElement* webrtc,
                                                                                         guint mlineindex,
                                                                                         gchar* candidate,
                                                                                         SessionCore* core);
 
-/// <summary>
-/// handle on negotiation signal from webrtcbin element, 
-/// typically emitted when pipeline is set to PLAYING 
-/// <param name="element"></param>
-/// <param name="core"></param>
+/**
+ * @brief j
+ * on negotiation needed signall emit by webrtc bin for signal the start of signalling procedure
+ * @param element 
+ * @param core 
+ */
 void                            on_negotiation_needed                                   (GstElement* element,
                                                                                         SessionCore* core);
 
 
-/// <summary>
-/// handle on ice gathering state from webrtcbin element,
-/// typically emitted when pipeline is set to PLAYING 
-/// </summary>
-/// <param name="webrtcbin"></param>
-/// <param name="pspec"></param>
-/// <param name="user_data"></param>
+/**
+ * @brief 
+ * connect session core pipeline with corresponding signalling handler function
+ * @param core 
+ */
+void                            connect_signalling_handler                              (SessionCore* core);
+
+/**
+ * @brief 
+ * on ice gathering state notify
+ * @param webrtcbin 
+ * @param pspec 
+ * @param user_data 
+ */
 void                            on_ice_gathering_state_notify                           (GstElement* webrtcbin,
                                                                                         GParamSpec* pspec,
                                                                                         gpointer user_data);
 
-/// <summary>
-/// initialize signalling hub 
-/// </summary>
-/// <param name="core"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * initialize signalling hub from session core
+ * @param core session core, parent of signalling hub
+ * @return SignallingHub* pointer to signalling hub
+ */
 SignallingHub*                  signalling_hub_initialize                               (SessionCore* core);
 
 
-/// <summary>
-/// connect to signalling server, 
-/// this function should be triggered in initialize process
-/// </summary> 
-/// <param name="core">session core object</param>
+/**
+ * @brief 
+ * start connecting with signalling server
+ * @param core 
+ */
 void                            connect_to_websocket_signalling_server_async            (SessionCore* core);
 
-/// <summary>
-/// 
-/// </summary>
-/// <param name="hub"></param>
-/// <param name="turn"></param>
-/// <param name="url"></param>
-/// <param name="session_slave_id"></param>
+/**
+ * @brief 
+ * setup signalling information 
+ * @param hub signalling hub
+ * @param turn turn connection, follow the turn connection string format of gstreamer and be prepared by host
+ * @param url url of signalling server that session core establish connection with
+ * @param remote_token remote token used as a query parameter to connect with host
+ */
 void                            signalling_hub_setup                                    (SignallingHub* hub,
                                                                                         gchar* turn, 
-                                                                                        gchar* url);
+                                                                                        gchar* url,
+                                                                                        gchar* remote_token);
 
-/// <summary>
-/// close websocket connection with signalling server 
-/// (it means session disconnnected event will be triggered)
-/// </summary>
-/// <param name="hub"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * close the websocket connection with signalling server
+ * one should be very carefull when using this function
+ * @param hub 
+ * @return gboolean 
+ */
 gboolean                        signalling_close                                        (SignallingHub* hub);
 
-/// <summary>
-/// get stun server from signallinghub, 
-/// stun server will follow gstreamer format 
-/// (Ex: stun://stun.l.google.com:3475)
-/// </summary>
-/// <param name="hub"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * get turn server from signalling hub
+ * @param hub 
+ * @return gchar* 
+ */
 gchar*                          signalling_hub_get_turn_server                          (SignallingHub* hub);
 
 

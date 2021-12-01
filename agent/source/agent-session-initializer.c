@@ -2,7 +2,6 @@
 #include <agent-socket.h>
 #include <agent-type.h>
 #include <agent-child-process.h>
-#include <state-indicator.h>
 
 #include <error-code.h>
 #include <message-form.h>

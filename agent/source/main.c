@@ -9,6 +9,7 @@
 #include <message-form.h>
 
 #define GST_DEBUG               4
+#define    THINKMAY_ACCOUNT_URL              "https://host.thinkmay.net/Account/Login"
 
 
 
@@ -67,11 +68,8 @@ main(int argc, char* argv[])
     json_object_set_string_member(login,"Password",PASSWORD);
     gchar* login_body = get_string_from_json_object(login);
 
-    gchar* uri = "https://host.thinkmay.net/Account/Login";
 
-
-
-    SoupMessage* message = soup_message_new(SOUP_METHOD_POST,uri);
+    SoupMessage* message = soup_message_new(SOUP_METHOD_POST,THINKMAY_ACCOUNT_URL);
     soup_message_set_request(message,"application/json",SOUP_MEMORY_COPY,login_body,strlen(login_body));
     soup_session_send_message(session,message);
 

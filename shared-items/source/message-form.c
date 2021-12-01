@@ -3,36 +3,6 @@
 
 
 
-Message*
-message_init(Module from,
-			Module to,
-			Opcode opcode,
-			Message* data)
-{
-	Message* object = json_object_new();
-
-	json_object_set_int_member(object, "From", from);
-	json_object_set_int_member(object, "To", to);
-	json_object_set_int_member(object, "Opcode", opcode);
-    gchar* data_string = get_string_from_json_object(data);
-
-    json_object_set_string_member(object, "Data", data_string);
-    return object;
-}
-
-Message*
-empty_message_init(Module from,
-			       Module to,
-			       Opcode opcode)
-{
-	Message* object = json_object_new();
-
-	json_object_set_int_member(object, "From", from);
-	json_object_set_int_member(object, "To", to);
-	json_object_set_int_member(object, "Opcode", opcode);
-    json_object_set_string_member(object, "Data"," ");
-    return object;
-}
 
 
 
@@ -57,7 +27,7 @@ get_string_from_json_object(JsonObject* object)
 
 
 
-Message*
+JsonObject*
 get_json_object_from_string(gchar* string, 
                             GError** error,
                             JsonParser* parser)
@@ -73,7 +43,7 @@ get_json_object_from_string(gchar* string,
 }
 
 
-Message*
+JsonObject*
 get_json_object_from_file(gchar* file_name, 
                           GError** error)
 {

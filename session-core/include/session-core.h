@@ -17,97 +17,73 @@
 
 
 
-/// <summary>
-/// setup pipeline, 
-/// this function should be called after registered session with signalling server
-/// </summary> 
-/// <param name="self">session core object</param>
-void			session_core_setup_pipeline				(SessionCore* self);
 
-/// <summary>
-/// session core setup signalling server, 
-/// in this step, signalling url will be assigned
-/// </summary> 
-/// <param name="self">session core object</param>
-void	  		session_core_setup_webrtc_signalling	(SessionCore* self);
 
-/// <summary>
-/// connect to signalling server,
-/// this function should be called after all initilize step is done
-/// </summary> 
-/// <param name="self"></param>
-void			session_core_connect_signalling_server	(SessionCore* self);
 	
 
-/// <summary>
-/// initialize session core, 
-/// this function should be called in main function
-/// </summary> 
-/// <returns>session core object</returns>
+/**
+ * @brief 
+ * initialize session core, 
+ * initialization of session core do not need any input parameter, 
+ * instead, session will automatically their required parameter from global-var.h
+ * all operation needed to establishing a remote connection is already called inside session core initialize
+ * @return SessionCore* pointer to session core instance
+ */
 SessionCore*	session_core_initialize					();
 
-/// <summary>
-/// finalize session core object, 
-/// this function should be called when an error is occour
-/// </summary> 
-/// <param name="self"></param>
-/// <param name="exit_code">reason of exit</param>
-/// <param name="error">error emmited (if available)</param>
+
+
+/**
+ * @brief 
+ * end session core and send error code to cluster manager
+ * session core finalize simply terminate the window and exit the program
+ * @param self 
+ * @param error 
+ */
 void			session_core_finalize					(SessionCore* self,
 														GError* error);
 
-/// <summary>
-/// get pipeline from session core object
-/// </summary>
-/// <param name="self"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * get pipeline from session core
+ * @param self session core
+ * @return Pipeline* pointer to pipeline
+ */
 Pipeline*		session_core_get_pipeline				(SessionCore* self);
 
-/// <summary>
-/// get webrtchub from session core object, 
-/// webrtc hub will be use for data transfer between session core and client 
-/// through webrtc datachannel 
-/// </summary>
-/// <param name="self"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * get webrtc hub from session core
+ * @param self session core
+ * @return WebRTCHub*  pointer to webrtc
+ */
 WebRTCHub*		session_core_get_rtc_hub				(SessionCore* self);
 
-/// <summary>
-/// get quality of experience from session core object 
-/// </summary>
-/// <param name="self"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * get qoe from session core
+ * @param self session core
+ * @return QoE* qoe
+ */
 QoE*			session_core_get_qoe					(SessionCore* self);
 
-/// <summary>
-/// set state of session core object,
-/// </summary>
-/// <param name="core">a string represent state of session core</param>
-/// <param name="state"></param>
-void			session_core_set_state					(SessionCore* core, 
-														 CoreState state);
 
-/// <summary>
-/// get core state from session core object
-/// </summary>
-/// <param name="self"></param>
-/// <returns></returns>
-CoreState		session_core_get_state					(SessionCore* self);
 
-/// <summary>
-/// get signalling hub from session core object,
-/// signalling hub will be use to communicate with signalling server
-/// for register remote session and exchange sdp and ice 
-/// </summary>
-/// <param name="core"></param>
-/// <returns></returns>
-SignallingHub*	session_core_get_signalling_hub			(SessionCore* core);
+/**
+ * @brief 
+ * get signalling hub from session core
+ * @param self session core
+ * @return SignallingHub* 
+ */
+SignallingHub*	session_core_get_signalling_hub			(SessionCore* self);
 
-/// <summary>
-/// report session core error with server
-/// </summary> 
-/// <param name="self"></param>
-/// <param name="code"></param>
+/**
+ * @brief 
+ * report session core error, 
+ * this function will simply send the error message to cluster manager
+ * @param self 
+ * @param code 
+ */
 void			report_session_core_error				(SessionCore* self,
 														 ErrorCode code);
 #endif 

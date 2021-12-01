@@ -17,54 +17,40 @@
 
 
 
-/// <summary>
-/// Pipeline is a struct contain all GstElement neccessary for
-/// session core to encode video and audio
-/// </summary> 
+
+/**
+ * @brief 
+ * Pipeline is a data structure that wrap around video and audio
+ * handling functionality of session core  
+ */
 typedef struct 			_Pipeline 				                Pipeline;
 
-/// <summary>
-/// Session core is a struct represent for session core module
-/// </summary> 
+/**
+ * @brief 
+ * SessionCore is a data structure that wrap outside the session core module
+ */
 typedef struct 			_SessionCore 			                SessionCore;
 
-/// <summary>
-/// qoe struct responsible for store recorded qoe metrict and other variable related to 
-/// quality of experience of session core 
-/// </summary> 
+/**
+ * @brief 
+ * QoE is a data structure wrap around all QoS metric
+ */
 typedef struct 			_QoE					                QoE;
 
-/// <summary>
-/// webrtchub struct responsible for handle datachannel message from client
-/// </summary>
+/**
+ * @brief 
+ * WebRTCHub is a module that wrap around communication method with client module
+ */
 typedef struct			_WebRTCHub				                WebRTCHub;
 
-/// <summary>
-/// signalling hub responsible for handle ice candidate and sdp negotiation with client module 
-/// through signalling server.
-/// </summary>
+/**
+ * @brief 
+ * signalling hub is a datastructure that wrap around communication module with signalling module
+ * signalling procedure is needed to establish webrtc connection with client module
+ */
 typedef struct 			_SignallingHub			                SignallingHub;
 
 
-/// <summary>
-/// session core state in form of string
-/// </summary>
-typedef					gchar*					                CoreState;
-
-/// <summary>
-/// PipelineState in form of string
-/// </summary>
-typedef					gchar*					                PipelineState;
-
-/// <summary>
-/// signalling state in form of string
-/// </summary>
-typedef					gchar*					                SignallingServerState;
-
-/// <summary>
-/// peer call state in form of string
-/// </summary>
-typedef					gchar*					                PeerCallState;
 
 
 #endif // ! __SESSION_CORE_TYPE_H__

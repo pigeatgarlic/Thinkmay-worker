@@ -1,3 +1,13 @@
+/**
+ * @file session-core.c
+ * @author {Do Huy Hoang} ({huyhoangdo0205@gmail.com})
+ * @brief 
+ * @version 1.0
+ * @date 2021-12-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #include <session-core-signalling.h>
 #include <session-core-remote-config.h>
 #include <session-core-pipeline.h>
@@ -36,17 +46,34 @@ struct _SessionCore
 
 
 
-static SessionCore core_declare;
 
+/**
+ * @brief 
+ * callback function used to handle soup message from client,
+ * those message will only come from agent and cluster manager 
+ * @param server session core soup server
+ * @param msg message that need to handle
+ * @param path 
+ * @param query 
+ * @param user_data pointer to session core
+ */
 void	   server_callback (SoupServer        *server,
 							SoupMessage	   	  *msg,
 							const char        *path,
 							GHashTable        *query,
 							gpointer           user_data);
-/// <summary>
-/// setup slave session, this step include get value from json config file 
-/// </summary>
-/// <param name="self"></param>
+
+
+
+
+
+
+
+/**
+ * @brief 
+ * setup session by request input from database with worker token given by agent
+ * @param self session core
+ */
 static void
 session_core_setup_session(SessionCore* self)
 {
@@ -56,65 +83,76 @@ session_core_setup_session(SessionCore* self)
 			SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
 			SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
 		
-	GString* signalling_url = g_string_new("http://");
-	g_string_append(signalling_url,CLUSTER_IP);
-	g_string_append(signalling_url,":80/session/signalling");
+	GString* infor_url = g_string_new("http://");
+	g_string_append(infor_url,	CLUSTER_IP);
+	g_string_append(infor_url,":5000/session/infor");
 
-	GString* turnstring= g_string_new("http://");
-	g_string_append(turnstring,	CLUSTER_IP);
-	g_string_append(turnstring,":80/session/turn");
+	GString* token_url= g_string_new("http://");
+	g_string_append(token_url,	CLUSTER_IP);
+	g_string_append(token_url,":5000/session/token");
 
-	GString* qoestring = g_string_new("http://");
-	g_string_append(turnstring,	CLUSTER_IP);
-	g_string_append(turnstring,":80/session/qoe");
+	gchar* infor_str = g_string_free(infor_url,FALSE);
+	gchar* token_str = g_string_free(token_url,FALSE);
 
-	gchar* signalling = g_string_free(signalling_url,FALSE);
-	gchar* turn = g_string_free(turnstring,FALSE);
-	gchar* qoe = g_string_free(qoestring,FALSE);
+	SoupMessage* infor_message = soup_message_new(SOUP_METHOD_GET,infor_str);
+	SoupMessage* token_message = soup_message_new(SOUP_METHOD_GET,token_str);
 
-	SoupMessage* signalling_message = soup_message_new(SOUP_METHOD_GET,signalling);
-	SoupMessage* turn_message = soup_message_new(SOUP_METHOD_GET,turn);
-	SoupMessage* qoe_message = soup_message_new(SOUP_METHOD_GET,qoe);
+	soup_message_headers_append(token_message->request_headers,"Authentication",TOKEN);
+	soup_message_headers_append(infor_message->request_headers,"Authentication",TOKEN);
 
+	soup_session_send_message(session,infor_message);
+	soup_session_send_message(session,token_message);
 
-	soup_message_headers_append(signalling_message->request_headers,"Authentication",TOKEN);
-	soup_message_headers_append(turn_message->request_headers,"Authentication",TOKEN);
-	soup_message_headers_append(qoe_message->request_headers,"Authentication",TOKEN);
-
-	soup_session_send_message(session,signalling_message);
-	soup_session_send_message(session,turn_message);
-	soup_session_send_message(session,qoe_message);
-
-	if(signalling_message->status_code == SOUP_STATUS_OK &&
-	   turn_message->status_code == SOUP_STATUS_OK &&
-	   qoe_message->status_code == SOUP_STATUS_OK)
+	if(infor_message->status_code == SOUP_STATUS_OK &&
+	   token_message->status_code == SOUP_STATUS_OK )
 	{
-		signalling_hub_setup(self->hub,
-			turn_message->response_body->data,
-			signalling_message->response_body->data);
-
 		GError* error = NULL;
 		JsonParser* parser = json_parser_new();
-		qoe_setup(self->qoe , 
-			get_json_object_from_string(qoe_message->response_body->data,&error,parser));
+		JsonObject* json_infor = get_json_object_from_string(infor_message->response_body->data,error,parser);
+
+		signalling_hub_setup(self->hub,
+			json_object_get_string_member(json_infor,"turnConnection"),
+			json_object_get_string_member(json_infor,"SignallingUrl"),
+			token_message->response_body->data);
+
+		qoe_setup(self->qoe,
+					json_object_get_int_member(json_infor,"ScreenWidth"),
+					json_object_get_int_member(json_infor,"ScreenHeight"),
+					json_object_get_int_member(json_infor,"AudioCodec"),
+					json_object_get_int_member(json_infor,"VideoCodec"),
+					json_object_get_int_member(json_infor,"QoEMode"));
+		g_object_unref(parser);
 	}
 	else 
 	{
-		GError* error = g_error_new(1234,234,"fail to get session infor from cluster",NULL);
+		GError* error = malloc(sizeof(GError));
+		error->message = "fail to get session information";
 		session_core_finalize(self,error);
 		return;
 	}
 	worker_log_output("session core setup done");
 }
 
+
+
+
+
+
+
+/**
+ * @brief 
+ * initialize session core with message handler
+ * @param core 
+ * @return SoupServer* 
+ */
 static SoupServer*
-init_session_core_server()
+init_session_core_server(SessionCore* core)
 {
 	GError* error = NULL;
 	SoupServer* server = soup_server_new(NULL);
 
 	soup_server_add_handler(server,
-		"/",server_callback,&core_declare,NULL);
+		"/",server_callback,core,NULL);
 
 	soup_server_listen_all(server,2250,0,&error);
 	if(error){g_printerr(error->message); return;}
@@ -168,18 +206,19 @@ SessionCore*
 session_core_initialize()
 {
 	worker_log_output("Session core process started");
+	SessionCore* core = malloc(sizeof(SessionCore));
 
-	core_declare.server = 			init_session_core_server();
-	core_declare.hub =				webrtchub_initialize();
-	core_declare.signalling =		signalling_hub_initialize(&core_declare);
-	core_declare.qoe =				qoe_initialize();
-	core_declare.pipe =				pipeline_initialize(&core_declare);
-	core_declare.loop =				g_main_loop_new(NULL, FALSE);
+	core->server = 				init_session_core_server(core);
+	core->hub =					webrtchub_initialize();
+	core->signalling =			signalling_hub_initialize(core);
+	core->qoe =					qoe_initialize();
+	core->pipe =				pipeline_initialize(core);
+	core->loop =				g_main_loop_new(NULL, FALSE);
 
-	session_core_setup_session(&core_declare);
-	session_core_connect_signalling_server(&core_declare);
-	g_main_loop_run(core_declare.loop);
-	return &core_declare;	
+	session_core_setup_session(core);
+	connect_to_websocket_signalling_server_async(core);
+	g_main_loop_run(core->loop);
+	return core;	
 }
 
 
@@ -187,11 +226,6 @@ session_core_initialize()
 
 
 
-void
-session_core_connect_signalling_server(SessionCore* self)
-{
-	connect_to_websocket_signalling_server_async(self);
-}
 
 
 

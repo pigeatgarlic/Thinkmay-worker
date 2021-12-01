@@ -16,56 +16,64 @@
 
 
 
-/// <summary>
-/// initialize qoe metric measurement
-/// </summary> 
-/// <returns></returns>
+/**
+ * @brief 
+ * initialize QoE for the stream
+ * @return QoE* 
+ */
 QoE*			qoe_initialize						();
 
-/// <summary>
-/// setup qoe metric measurement
-/// </summary> 
-/// <param name="qoe"></param>
-/// <param name="screen_width"></param>
-/// <param name="screen_height"></param>
-/// <param name="audio_codec"></param>
-/// <param name="video_codec"></param>
-/// <param name="qoe_mode"></param>
-void			qoe_setup							(QoE* qoe,
-													 Message* request_result );
+/**
+ * @brief 
+ * setup QoS with given metric
+ * @param qoe qoe 
+ * @param screen_width  screen width that will be capture by session core, current screen size will be automatically adjusted to fit with client need
+ * @param screen_height  screen height that will be capture by session core, current screen size will be automatically adjusted to fit with client need
+ * @param audio_codec audio codec that will be used for the stream
+ * @param video_codec video codec that will be used for the stream
+ * @param mode qoe mode that will be used during the stream
+ */
+void 			qoe_setup							(QoE* qoe,
+													gint screen_width,
+													gint screen_height,
+													Codec audio_codec,
+													Codec video_codec,
+													QoEMode mode);
 
 
-/// <summary>
-/// get audio codec from current remote session
-/// </summary>
-/// <param name="qoe"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * get audio codec of the stream
+ * @param qoe 
+ * @return Codec 
+ */
 Codec			qoe_get_audio_codec					(QoE* qoe);
 
-/// <summary>
-/// get video codec from current remote session
-/// </summary>
-/// <param name="qoe"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * get video codec of the stream
+ * @param qoe 
+ * @return Codec 
+ */
 Codec			qoe_get_video_codec					(QoE* qoe);
 
 
-
-
-/// <summary>
-/// 
-/// </summary>
-/// <param name="qoe"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * get screen height of current session  
+ * @param qoe 
+ * @return gint 
+ */
 gint			qoe_get_screen_height				(QoE* qoe);
 
 
 
-/// <summary>
-/// 
-/// </summary>
-/// <param name="qoe"></param>
-/// <returns></returns>
+/**
+ * @brief 
+ * get screen width of current session
+ * @param qoe 
+ * @return gint 
+ */
 gint			qoe_get_screen_width				(QoE* qoe);
 
 

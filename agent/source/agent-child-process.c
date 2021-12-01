@@ -3,7 +3,6 @@
 #include <agent-server.h>
 
 
-#include <state-indicator.h>
 #include <logging.h>
 #include <error-code.h>
 

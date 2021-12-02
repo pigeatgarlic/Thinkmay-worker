@@ -19,83 +19,66 @@
 
 
 
-/// <summary>
-/// Socket is a object use to manage connection with host, 
-/// included send and receive,
-/// </summary>
+/**
+ * @brief 
+ * Socket is a object that wrap around agent connection with cluster manager
+ */
 typedef struct _Socket 				Socket;
 
 
-/// <summary>
-/// device information use to register 
-/// information with host, include GPU, CPU, RAM
-/// </summary>
+/**
+ * @brief 
+ * Device INformation is a structure that wrap around information of worker node
+ */
 typedef struct _DeviceInformation 	DeviceInformation;
 
-/// <summary>
-/// agent object is an object use to abstract agent module
-/// </summary>
+/**
+ * @brief 
+ * Agent server is a data structure that wrap around agent module
+ */
 typedef struct _AgentServer			AgentServer;
 
-/// <summary>
-/// childprocess object abstract the existen of child process
-/// </summary>
+/**
+ * @brief 
+ * ChildProcess is a data structure wrap around child process creation and termination
+ */
 typedef	struct _ChildProcess		ChildProcess;
 
 
-/// <summary>
-/// 
-/// </summary>
+/**
+ * @brief 
+ * Shellsession is a datastructure that wrap around shell session execution
+ */
 typedef struct _ShellSession        ShellSession;
 
-/// <summary>
-/// 
-/// </summary>
+/**
+ * @brief 
+ * Remote session is a data structure that wrap around remote service
+ */
 typedef struct _RemoteSession       RemoteSession;
 
-/// <summary>
-/// 
-/// </summary>
-typedef struct _FileTransferSession FileTransferSession;
 
-/// <summary>
-/// 
-/// </summary>
-typedef struct _FileCompressor      FileCompressor;
-
-/// <summary>
-/// 
-/// </summary>
-typedef struct _FileTransceiver     FileTransceiver;
-
-/// <summary>
-/// for better maintainance, 
-/// message will be use to replace JsonObject
-/// </summary>
-typedef		   JsonObject			Message;
-
-/// <summary>
-/// child standard input output handle, 
-/// this function is settled inside a looped thread 
-/// and sould be invoked when child process emit output to stdout  
-/// </summary>
+/**
+ * @brief 
+ * Child stdout handle is a function that will be 
+ * callback for every new output buffer from child process
+ */
 typedef void  (*ChildStdOutHandle)    (GBytes* buffer,
                                      AgentServer* agent,
                                      gpointer data);
 
-/// <summary>
-/// child standard input output handle, 
-/// this function is settled inside a looped thread 
-/// and sould be invoked when child process emit output to stdout  
-/// </summary>
+/**
+ * @brief 
+ * Child stdout handle is a function that will be 
+ * callback for every new stderr buffer from child process
+ */
 typedef void  (*ChildStdErrHandle)    (GBytes* buffer,
                                      AgentServer* agent,
                                      gpointer data);
-/// <summary>
-/// child state handle function is setteled inside a looped thread 
-/// and responsible for manage state of child process thread
-/// (Ex: report session disconnected to host if session core process ended)
-/// </summary>
+/**
+ * @brief 
+ * ChildStateHandle is a function that handle self termination of child process
+ */
 typedef void  (*ChildStateHandle)  (ChildProcess* proc,
                                     AgentServer* agent,
                                     gpointer data);

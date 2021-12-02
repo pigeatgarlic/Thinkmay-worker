@@ -377,7 +377,7 @@ connect_to_websocket_signalling_server_async(SessionCore* core)
 
     GString* request_uri = g_string_new(hub->signalling_server);
     g_string_append(request_uri,"?token=");
-    g_string_append(request_uri,TOKEN);
+    g_string_append(request_uri,hub->remote_token);
     gchar* request_string = g_string_free(request_uri,FALSE);
 
     message = soup_message_new(SOUP_METHOD_GET, request_string);

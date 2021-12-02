@@ -14,10 +14,8 @@
 
 #include <glib.h>
 #include <libsoup/soup.h>
-#include <json-glib-1.0/json-glib/json-glib.h>
 #include <agent-server.h>
 
-#include <Windows.h>
 
 
 
@@ -37,17 +35,17 @@
 gboolean                                register_with_host                  (AgentServer* self);
 
 
-gboolean								send_message_to_host				(AgentServer* self,
-                                                                             gchar* data);
-
-/// <summary>
-/// connect to host asynchronously,
-/// this function create new soup message and session,
-/// wrap soup_websocket_connect_async function
-/// </summary>
-/// <param name="self"></param>
-void									connect_to_host_async				(AgentServer* self);
-
+/**
+ * @brief 
+ * send message to cluster at a specific endpoint
+ * @param object agent server
+ * @param endpoint (enpoint present by string) (for ex: core/end)
+ * @param message (Nullable) messsage body
+ * @return gboolean 
+ */
+gboolean 								send_message_to_cluster				(AgentServer* object,
+																			gchar* endpoint,
+																			gchar* message);
 
 /**
  * @brief 
@@ -55,14 +53,4 @@ void									connect_to_host_async				(AgentServer* self);
  * @return Socket* pointer to socket instance
  */
 Socket*                                 initialize_socket                   ();
-
-/**
- * @brief 
- * close socket
- * @param socket 
- */
-void                                    socket_close                        (Socket* socket);
-
-/*END get-set function for Socket*/
-
 #endif

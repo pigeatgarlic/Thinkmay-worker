@@ -42,7 +42,7 @@ intialize_remote_session_service()
     RemoteSession* remote = malloc(sizeof(RemoteSession));
     GString* base_url = g_string_new("http://localhost:");
     g_string_append(base_url,SESSION_CORE_PORT);
-    g_string_append(base_url,"/agent");
+    g_string_append(base_url,"/agent/message");
     gchar* url = g_string_free(base_url,FALSE);
 
     const gchar* http_aliases[] = { "http", NULL };
@@ -63,13 +63,7 @@ handler_session_core_state_function(ChildProcess* proc,
                                     AgentServer* agent)
 {
     RemoteSession* session = agent_get_remote_session(agent);
-
-    SoupMessage* message = soup_message_new(SOUP_METHOD_POST,session->session_core_url);
-    soup_message_headers_append(message->request_headers,"Authorization",TOKEN);
-
-    SoupMessageBody* body = message->request_body;
-    
-    soup_session_send(session->session,message,NULL,NULL);
+    send_message_to_cluster(agent,"core/end",NULL);
 }
 
 
@@ -100,7 +94,7 @@ session_reconnect(AgentServer* agent)
 
     GString* core_script = g_string_new(SESSION_CORE_BINARY);
     g_string_append(core_script," --token=");
-    g_string_append(core_script,TOKEN);
+    g_string_append(core_script,DEVICE_TOKEN);
     g_string_append(core_script," --clusterip=");
     g_string_append(core_script,CLUSTER_IP);
 
@@ -149,7 +143,7 @@ session_initialize(AgentServer* agent)
 
     GString* core_script = g_string_new(SESSION_CORE_BINARY);
     g_string_append(core_script," --token=");
-    g_string_append(core_script,TOKEN);
+    g_string_append(core_script,DEVICE_TOKEN);
     g_string_append(core_script," --clusterip=");
     g_string_append(core_script,CLUSTER_IP);
 
@@ -166,13 +160,16 @@ session_initialize(AgentServer* agent)
 }
 
 gboolean
-send_message_to_core(AgentServer* agent, gchar* buffer)
+send_message_to_core(AgentServer* agent, 
+                     gchar* buffer)
 {
     RemoteSession* session = agent_get_remote_session(agent);
 
     SoupMessage* message = soup_message_new(SOUP_METHOD_POST,session->session_core_url);
-    soup_message_headers_append(message->request_headers,"Authorization",TOKEN);
+    soup_message_headers_append(message->request_headers,"Authorization",DEVICE_TOKEN);
 
-    soup_message_set_request(message,"application/text",SOUP_MEMORY_COPY,buffer,strlen(buffer)); 
+    soup_message_set_request(message,"application/text",SOUP_MEMORY_COPY,
+        buffer,strlen(buffer)); 
+
     soup_session_send_async(session->session,message,NULL,NULL,NULL);
 }

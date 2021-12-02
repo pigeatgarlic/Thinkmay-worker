@@ -23,6 +23,9 @@
 #include <libsoup/soup.h>
 #include <glib-2.0/glib/gstdio.h>
 #include <libsoup/soup.h>
+#ifdef G_OS_WIN32
+#include <Windows.h>
+#endif
 
 #include <logging.h>
 #include <error-code.h>
@@ -72,7 +75,7 @@ server_callback (SoupServer        *server,
 	const char *name, *value;
 	AgentServer* agent = (AgentServer*)user_data;
 	SoupURI* uri = soup_message_get_uri(msg);
-	gchar* token;
+	gchar* request_token;
 
 	if(!g_strcmp0(uri->path,"/ping"))
 	{
@@ -87,13 +90,13 @@ server_callback (SoupServer        *server,
 	{
 		if(!g_strcmp0(name,"Authorization"))
 		{
-			token = value;
+			request_token = value;
 		}
 	}
 
-	if(!TOKEN)
+	if(DEVICE_TOKEN)
 	{
-		if(g_strcmp0(value,TOKEN))
+		if(g_strcmp0(value,DEVICE_TOKEN))
 		{
 			soup_message_set_status(msg,SOUP_STATUS_UNAUTHORIZED);
 			return;
@@ -163,6 +166,10 @@ agent_finalize(AgentServer* self)
 {
 	if (self->loop)
 		g_main_loop_quit(self->loop);
+
+#ifdef G_OS_WIN32
+	ExitProcess(0);
+#endif
 }
 
 

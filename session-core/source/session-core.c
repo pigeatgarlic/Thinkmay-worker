@@ -25,6 +25,11 @@
 
 #include <glib.h>
 
+#ifdef G_OS_WIN32
+#include <Windows.h>
+
+#endif
+
 
 struct _SessionCore
 {
@@ -97,8 +102,8 @@ session_core_setup_session(SessionCore* self)
 	SoupMessage* infor_message = soup_message_new(SOUP_METHOD_GET,infor_str);
 	SoupMessage* token_message = soup_message_new(SOUP_METHOD_GET,token_str);
 
-	soup_message_headers_append(token_message->request_headers,"Authentication",TOKEN);
-	soup_message_headers_append(infor_message->request_headers,"Authentication",TOKEN);
+	soup_message_headers_append(token_message->request_headers,"Authentication",DEVICE_TOKEN);
+	soup_message_headers_append(infor_message->request_headers,"Authentication",DEVICE_TOKEN);
 
 	soup_session_send_message(session,infor_message);
 	soup_session_send_message(session,token_message);
@@ -188,9 +193,9 @@ server_callback (SoupServer        *server,
 			return;
 		}
 		if(!g_strcmp0(name,"Authorization") &&
-		   !g_strcmp0(value,core->token))
+		   !g_strcmp0(value,DEVICE_TOKEN))
 		{
-			if(!g_strcmp0(uri->path,"/agent/Message"))
+			if(!g_strcmp0(uri->path,"/agent/message"))
 			{
 				msg->status_code = SOUP_STATUS_OK;
 				return;
@@ -236,8 +241,15 @@ session_core_finalize(SessionCore* self,
 					  GError* error)
 {
 	worker_log_output(error->message);
-	g_main_loop_unref(self->loop);
+	if(self->loop)
+		g_main_loop_unref(self->loop);
+
+#ifdef G_OS_WIN32
+	ExitProcess(0);
+#endif
+
 }
+
 
 
 

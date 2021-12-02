@@ -19,7 +19,7 @@ static GOptionEntry entries[] = {
       "Signalling server to connect to", "URL"},
   {"clusterip", 0, 0, G_OPTION_ARG_INT, &CLUSTER_IP,
       "Signalling server to connect to", "URL"},
-  {"token", 0, 0, G_OPTION_ARG_STRING, &TOKEN,
+  {"token", 0, 0, G_OPTION_ARG_STRING, &DEVICE_TOKEN,
       "Signalling server to connect to", "URL"},
   {NULL},
 };

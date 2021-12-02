@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include <libsoup/soup.h>
+#include <global-var.h>
 
 
 
@@ -30,9 +31,23 @@ worker_log_output(gchar* text)
             SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
             SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
 
-    SoupMessage* message = soup_message_new(SOUP_METHOD_POST,"http://192.168.1.12/Log");
-    soup_message_set_request(message,"application/text",SOUP_MEMORY_COPY,text,strlen(text));
-    soup_session_send(session,message,NULL,NULL);    
+    // get log url from clusterip
+    GString* string = g_string_new("http://");
+    g_string_append(string,CLUSTER_IP);
+    g_string_append(string,":5000/log");
+    gchar* log_url = g_string_free(string,FALSE);
+    SoupMessage* message = soup_message_new(SOUP_METHOD_POST,log_url);
+
+    // add token if present
+    if(DEVICE_TOKEN)
+        soup_message_headers_append(message->request_headers,"Authorization",DEVICE_TOKEN);
+
+
+    // copy from buffer to soup message
+    soup_message_set_request(message,"application/text",
+        SOUP_MEMORY_COPY,text,strlen(text));
+
+    soup_session_send_async(session,message,NULL,NULL,NULL);    
     g_print(text);
     g_print("\n");
 }                  

@@ -47,15 +47,23 @@ struct _Socket
 
 
 gboolean
-send_message_to_host(AgentServer* object,
+send_message_to_cluster(AgentServer* object,
+                     gchar* endpoint,
                      gchar* message)
 {
     Socket* socket = agent_get_socket(object);
-    SoupMessage* soupMessage = soup_message_new(SOUP_METHOD_POST,socket->cluster_url);
+    GString* messsage_url = g_string_new(socket->cluster_url);
 
+    if(endpoint)
+        g_string_append(messsage_url,endpoint);
+    
+    SoupMessage* soupMessage = soup_message_new(SOUP_METHOD_POST,g_string_free(messsage_url,FALSE));
     soup_message_headers_append(soupMessage->request_headers,"Authorization",DEVICE_TOKEN);
-    soup_message_set_request(soupMessage,"application/json",
-        SOUP_MEMORY_COPY,message,strlen(message));
+
+    if(message)
+        soup_message_set_request(soupMessage,"application/json",SOUP_MEMORY_COPY,
+            message,strlen(message));
+
     soup_session_send_async(socket->session,soupMessage,NULL,NULL,NULL);
 }
 
@@ -69,21 +77,47 @@ register_with_host(AgentServer* agent)
     worker_log_output("Registering with host");
 
     gchar* package = get_registration_message();
-    SoupMessage* soupMessage = soup_message_new(SOUP_METHOD_POST,socket->cluster_url);
+    GString* register_url = g_string_new(socket->cluster_url);
+    g_string_append(register_url,"/register");
+    gchar* final_url = g_string_free(register_url,FALSE);
+
+    SoupMessage* soupMessage = soup_message_new(SOUP_METHOD_POST,final_url);
 
     soup_message_headers_append(soupMessage->request_headers,"Authorization",TOKEN);
-    soup_message_set_request(soupMessage,"application/json", SOUP_MEMORY_COPY,package,strlen(package));
+
+    soup_message_set_request(soupMessage,"application/json", SOUP_MEMORY_COPY,
+        package,strlen(package));
 
     soup_session_send_message(socket->session,soupMessage);
 
-    JsonParser* parser = json_parser_new();
-    JsonObject* result_json = get_json_object_from_string(soupMessage->response_body->data,&error,parser);
-    gchar* token_result = json_object_get_string_member(result_json,"token");
-    g_object_unref(parser); 
-    if(!token_result) { return FALSE; }
+    if(soupMessage->status_code != SOUP_STATUS_OK)
+    {
+        g_printerr("Fail to register device and get worker token\n");
+        agent_finalize(agent);
+        return;
+    }
+    else
+    {
+        JsonParser* parser = json_parser_new();
+        JsonObject* result_json = get_json_object_from_string(soupMessage->response_body->data,&error,parser);
+        gchar* token_result = json_object_get_string_member(result_json,"token");
+        g_object_unref(parser); 
+        if(token_result) 
+        { 
+            memcpy(DEVICE_TOKEN,token_result,strlen(token_result));
+            g_print("Register successfully with cluster manager and got worker token");
+            return FALSE; 
+        }
+        else
+        {
+            g_print("receive package from cluster do dotn include worker token, aborting...\n");
+            agent_finalize(agent);
+            return FALSE; 
+        }
+    }
+    
 
 
-    memcpy(DEVICE_TOKEN,token_result,strlen(token_result));
     return TRUE; 
 }
 
@@ -92,7 +126,6 @@ register_with_host(AgentServer* agent)
 
 
 
-/*START get-set-function for Socket*/
 
 Socket*
 initialize_socket()
@@ -103,7 +136,7 @@ initialize_socket()
 
     GString* string = g_string_new("http://");
     g_string_append(string,CLUSTER_IP);
-    g_string_append(string,":2220");
+    g_string_append(string,":5000/agent");
     gchar* url = g_string_free(string,FALSE);
 
     memcpy( socket->cluster_url,url,strlen(url)); 

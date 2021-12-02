@@ -86,4 +86,14 @@ SignallingHub*	session_core_get_signalling_hub			(SessionCore* self);
  */
 void			report_session_core_error				(SessionCore* self,
 														 ErrorCode code);
+
+
+/**
+ * @brief 
+ * get remote token from session core
+ * @param self session core
+ * @return gchar* remote token get from cluster
+ */
+gchar*			session_core_get_remote_token			(SessionCore* self);
+
 #endif 

@@ -62,15 +62,20 @@ main(int argc, char* argv[])
             SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
             SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
     
-    if(!strlen(user))
+    if(!strlen(USER))
     {
         g_print("Enter your thinkmay manager username:\n[USERNAME]: ");
-        scanf("%s", user);
+        scanf("%s", USER);
     }
-    if(!strlen(password))
+    if(!strlen(PASSWORD))
     {
         g_print("Enter your thinkmay manager password:\n[PASSWORD]: ");
-        scanf("%s", password);
+        scanf("%s", PASSWORD);
+    }
+    if(!strlen(CLUSTER_IP))
+    {
+        g_print("thinkmay cluster manager ip:\n[IP ADDRESS]: ");
+        scanf("%s", CLUSTER_IP);
     }
 
     JsonObject* login = json_object_new();
@@ -90,6 +95,10 @@ main(int argc, char* argv[])
     if(!token_result) {
         g_printerr("fail to login, retry\n");
         return;
+    }
+    else
+    {
+        g_print("login success\n");
     }
 
     memcpy(TOKEN,token_result,strlen(token_result));

@@ -22,6 +22,7 @@
 #include <glib-2.0/glib.h>
 #include <session-core-type.h>
 #include <libsoup/soup.h>
+#include <json-glib/json-glib.h>
 
 #include <gst/webrtc/webrtc.h>
 #include <gst/rtp/gstrtppayloads.h>
@@ -57,7 +58,7 @@ struct _SignallingHub
 
     /**
      * @brief 
-     * turn connection with turn server
+     * turn connection of the session 
      */
 	gchar* turn;
 
@@ -66,6 +67,12 @@ struct _SignallingHub
      * remote token use to establish connection with client
      */
     gchar* remote_token;
+
+    /**
+     * @brief 
+     * list of stun server
+     */
+    gchar stuns[50][10];
 };
 
 
@@ -82,14 +89,30 @@ signalling_hub_initialize(SessionCore* core)
     return hub;
 }
 
+static void
+handle_stun_list(JsonArray* stun_array,
+                 gint index,
+                 JsonNode* node,
+                 gpointer data)
+{
+    SignallingHub* hub = (SignallingHub*)data;
+    gchar* value = json_array_get_string_element(stun_array,index);
+    memcpy(hub->stuns[index], value, strlen(value));
+}
+
+
 void
 signalling_hub_setup(SignallingHub* hub, 
                      gchar* turn,
                      gchar* url,
+                     JsonArray* stuns,
                      gchar* remote_token)
 {
+    hub->remote_token = remote_token;
     hub->signalling_server = url;
     hub->turn = turn;
+    json_array_foreach_element(stuns,
+        (JsonArrayForeach)handle_stun_list,(gpointer)hub);
 }
 
 
@@ -258,6 +281,7 @@ on_server_closed(SoupWebsocketConnection* conn G_GNUC_UNUSED,
     SignallingHub* hub = session_core_get_signalling_hub(core);
     hub->connection = NULL;
     hub->session = NULL;
+    session_core_finalize(core,NULL);
 }
 
 /* Answer created by our pipeline, to be sent to the peer */
@@ -347,14 +371,8 @@ session_core_logger(SoupLogger* logger,
 
 
 
-/// <summary>
-/// *Connect to the signalling server. 
-///  This is the entrypoint for everything else.
-/// 
-/// </summary>
-/// <param name="core"></param>
 void
-connect_to_websocket_signalling_server_async(SessionCore* core)
+signalling_connect(SessionCore* core)
 {
     SoupLogger* logger;
     SoupMessage* message;
@@ -579,17 +597,6 @@ connect_signalling_handler(SessionCore* core)
 }
 
 
-gboolean
-signalling_close(SignallingHub* hub)
-{
-    if (hub->connection)
-    {
-        if (soup_websocket_connection_get_state(hub->connection) == SOUP_WEBSOCKET_STATE_OPEN)
-            soup_websocket_connection_close(hub->connection, 1000, "");
-        else
-            g_object_unref(hub->connection);
-    }
-}
 
 
 

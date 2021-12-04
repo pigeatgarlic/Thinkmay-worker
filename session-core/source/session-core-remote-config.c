@@ -27,16 +27,34 @@
 
 struct _QoE
 {
-	/*non volatile value, 
-	*determine in session initialize time*/
+	/**
+	 * @brief 
+	 * screen height be captured by session core
+	 */
 	gint screen_height;
+
+	/**
+	 * @brief 
+	 * screen width becaptured by session core
+	 */
 	gint screen_width;
 
-	/*quality control mode*/
+	/**
+	 * @brief 
+	 * qoe mode of the stream
+	 */
 	QoEMode mode;
 
-	/*codec audio*/
+	/**
+	 * @brief 
+	 * codec audio will be used throughout the stream
+	 */
 	Codec codec_audio;
+
+	/**
+	 * @brief 
+	 * codec video will be used throughout the stream
+	 */
 	Codec codec_video;
 
 };

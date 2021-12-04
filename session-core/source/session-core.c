@@ -33,19 +33,41 @@
 
 struct _SessionCore
 {
+	/**
+	 * @brief 
+	 * Soup server for receiving ping from cluster manager
+	 */
 	SoupServer* server;
 
+	/**
+	 * @brief 
+	 * pipeline of the stream
+	 */
 	Pipeline* pipe;
 
+	/**
+	 * @brief 
+	 * webrtchub to communicate with client
+	 */
 	WebRTCHub* hub;
 
+	/**
+	 * @brief 
+	 * mainloop run throughout the stream
+	 */
 	GMainLoop* loop;
 
+	/**
+	 * @brief 
+	 * signalling hub for connection with signalling server
+	 */
 	SignallingHub* signalling;
 
+	/**
+	 * @brief 
+	 * QoE of the stream
+	 */
 	QoE* qoe;
-
-	gchar* token;
 };
 
 
@@ -118,6 +140,7 @@ session_core_setup_session(SessionCore* self)
 		signalling_hub_setup(self->hub,
 			json_object_get_string_member(json_infor,"turnConnection"),
 			json_object_get_string_member(json_infor,"SignallingUrl"),
+			json_object_get_array_member(json_infor,"stuns")
 			token_message->response_body->data);
 
 		qoe_setup(self->qoe,
@@ -221,7 +244,7 @@ session_core_initialize()
 	core->loop =				g_main_loop_new(NULL, FALSE);
 
 	session_core_setup_session(core);
-	connect_to_websocket_signalling_server_async(core);
+	signalling_connect(core);
 	g_main_loop_run(core->loop);
 	return core;	
 }
@@ -240,7 +263,9 @@ void
 session_core_finalize(SessionCore* self, 
 					  GError* error)
 {
-	worker_log_output(error->message);
+	if(error)
+		worker_log_output(error->message);
+
 	if(self->loop)
 		g_main_loop_unref(self->loop);
 

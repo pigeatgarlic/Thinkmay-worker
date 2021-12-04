@@ -101,11 +101,11 @@ register_with_host(AgentServer* agent)
         JsonParser* parser = json_parser_new();
         JsonObject* result_json = get_json_object_from_string(soupMessage->response_body->data,&error,parser);
         gchar* token_result = json_object_get_string_member(result_json,"token");
-        g_object_unref(parser); 
         if(token_result) 
         { 
             memcpy(DEVICE_TOKEN,token_result,strlen(token_result));
-            g_print("Register successfully with cluster manager and got worker token");
+            g_print("Register successfully with cluster manager and got worker token\n");
+            g_object_unref(parser); 
             return FALSE; 
         }
         else

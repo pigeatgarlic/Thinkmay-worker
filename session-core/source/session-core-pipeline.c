@@ -86,7 +86,16 @@ enum
 
 struct _Pipeline
 {
+    /**
+     * @brief 
+     * GstPipeline of the remote session
+     */
 	GstElement* pipeline;
+
+    /**
+     * @brief 
+     * Webrtc bin responsible for creating webrtc connection
+     */
 	GstElement* webrtcbin;
 
     GstElement* video_element[VIDEO_ELEMENT_LAST];

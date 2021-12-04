@@ -78,7 +78,7 @@ SignallingHub*                  signalling_hub_initialize                       
  * start connecting with signalling server
  * @param core 
  */
-void                            connect_to_websocket_signalling_server_async            (SessionCore* core);
+void                            signalling_connect                                      (SessionCore* core);
 
 /**
  * @brief 
@@ -86,21 +86,15 @@ void                            connect_to_websocket_signalling_server_async    
  * @param hub signalling hub
  * @param turn turn connection, follow the turn connection string format of gstreamer and be prepared by host
  * @param url url of signalling server that session core establish connection with
+ * @param stun_array stun array for ice gathering 
  * @param remote_token remote token used as a query parameter to connect with host
  */
 void                            signalling_hub_setup                                    (SignallingHub* hub,
                                                                                         gchar* turn, 
                                                                                         gchar* url,
+                                                                                        JsonArray* stun_array,
                                                                                         gchar* remote_token);
 
-/**
- * @brief 
- * close the websocket connection with signalling server
- * one should be very carefull when using this function
- * @param hub 
- * @return gboolean 
- */
-gboolean                        signalling_close                                        (SignallingHub* hub);
 
 /**
  * @brief 

@@ -77,7 +77,7 @@ server_callback (SoupServer        *server,
 	SoupURI* uri = soup_message_get_uri(msg);
 	gchar* request_token;
 
-	if(!g_strcmp0(uri->path,"/ping"))
+	if(!g_strcmp0(uri->path,"/cluster/ping"))
 	{
 		gchar* response = "ping";
 		soup_message_set_response(msg, "application/json",SOUP_MEMORY_COPY,response,strlen(response));

@@ -65,6 +65,10 @@ get_local_ip()
     if ((dwRetVal = GetAdaptersInfo(pAdapterInfo, &ulOutBufLen)) == NO_ERROR) {
         pAdapter = pAdapterInfo;
         ip_address = pAdapter->IpAddressList.IpAddress.String;
+		while(!g_strcmp0(ip_address,"0.0.0.0")) 
+		{
+			ip_address = pAdapter->Next->IpAddressList.IpAddress.String;
+		}
     } else {
         printf("GetAdaptersInfo failed with error: %d\n", dwRetVal);
 
@@ -185,7 +189,7 @@ get_registration_message()
 	json_object_set_string_member(information,	"CPU", infor->cpu);
 	json_object_set_string_member(information,	"GPU", infor->gpu);
 	json_object_set_string_member(information,	"OS", infor->OS);
-	json_object_set_string_member(information,	"PrivateIP", infor->IP);
+	json_object_set_string_member(information,	"LocalIP", infor->IP);
 	json_object_set_int_member(information,		"RAMcapacity", infor->ram_capacity);
 
 	return get_string_from_json_object(information);

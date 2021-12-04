@@ -86,6 +86,7 @@ void
 signalling_hub_setup(SignallingHub* hub, 
                      gchar* turn,
                      gchar* url,
+                     JsonArray* stun_array,
                      gchar* remote_token)
 {
     hub->signalling_server = url;

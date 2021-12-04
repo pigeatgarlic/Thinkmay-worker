@@ -116,16 +116,16 @@ session_core_setup_session(SessionCore* self)
 		JsonObject* json_infor = get_json_object_from_string(infor_message->response_body->data,error,parser);
 
 		signalling_hub_setup(self->hub,
-			json_object_get_string_member(json_infor,"turnConnection"),
-			json_object_get_string_member(json_infor,"SignallingUrl"),
+			json_object_get_string_member(json_infor,"turn"),
+			json_object_get_string_member(json_infor,"signallingurl"),
 			token_message->response_body->data);
 
 		qoe_setup(self->qoe,
-					json_object_get_int_member(json_infor,"ScreenWidth"),
-					json_object_get_int_member(json_infor,"ScreenHeight"),
-					json_object_get_int_member(json_infor,"AudioCodec"),
-					json_object_get_int_member(json_infor,"VideoCodec"),
-					json_object_get_int_member(json_infor,"QoEMode"));
+					json_object_get_int_member(json_infor,"screenwidth"),
+					json_object_get_int_member(json_infor,"screenheight"),
+					json_object_get_int_member(json_infor,"audiocodec"),
+					json_object_get_int_member(json_infor,"videocodec"),
+					json_object_get_int_member(json_infor,"mode"));
 		g_object_unref(parser);
 	}
 	else 

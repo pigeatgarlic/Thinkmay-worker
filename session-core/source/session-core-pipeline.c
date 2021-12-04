@@ -468,7 +468,10 @@ setup_pipeline(SessionCore* core)
     setup_element_factory(core, 
         qoe_get_video_codec(qoe),
         qoe_get_audio_codec(qoe));
+    
+    
 
+    signalling_hub_setup_turn_and_stun(pipe,signalling);
     connect_signalling_handler(core);
     setup_element_property(core);
 

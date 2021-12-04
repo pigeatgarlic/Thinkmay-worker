@@ -98,11 +98,10 @@ void                            signalling_hub_setup                            
 
 /**
  * @brief 
- * get turn server from signalling hub
- * @param hub 
- * @return gchar* 
+ * setup turn and stun server for webrtcbin for ice gathering process
  */
-gchar*                          signalling_hub_get_turn_server                          (SignallingHub* hub);
+void                            signalling_hub_setup_turn_and_stun                      (Pipeline* pipeline,
+                                                                                        SignallingHub* hub);
 
 
 #endif // !__SESSION_CORE_SIGNALLING_H

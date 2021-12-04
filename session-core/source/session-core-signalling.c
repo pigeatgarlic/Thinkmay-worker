@@ -97,7 +97,10 @@ handle_stun_list(JsonArray* stun_array,
 {
     SignallingHub* hub = (SignallingHub*)data;
     gchar* value = json_array_get_string_element(stun_array,index);
-    memcpy(hub->stuns[index], value, strlen(value));
+    GString* stun = g_string_new("stun://");
+    g_string_append(stun,value);
+    gchar* stun_url = g_string_free(stun,FALSE);
+    memcpy(hub->stuns[index], stun_url, strlen(stun_url));
 }
 
 
@@ -105,13 +108,13 @@ void
 signalling_hub_setup(SignallingHub* hub, 
                      gchar* turn,
                      gchar* url,
-                     JsonArray* stuns,
+                     JsonArray* stun_array,
                      gchar* remote_token)
 {
     hub->remote_token = remote_token;
     hub->signalling_server = url;
     hub->turn = turn;
-    json_array_foreach_element(stuns,
+    json_array_foreach_element(stun_array,
         (JsonArrayForeach)handle_stun_list,(gpointer)hub);
 }
 
@@ -597,12 +600,20 @@ connect_signalling_handler(SessionCore* core)
 }
 
 
-
-
-
-/*START get-set function*/
-gchar* 
-signalling_hub_get_turn_server(SignallingHub* hub)
+void
+signalling_hub_setup_turn_and_stun(Pipeline* pipeline,
+                                  SignallingHub* hub) 
 {
-    return hub->turn;
+    GstElement* webrtcbin = pipeline_get_webrtc_bin(pipeline);
+    g_object_set(webrtcbin, "turn-server",hub->turn,NULL);
+
+    for (int i = 0; i < 5; i++)
+    {
+        if(strlen(hub->stuns[i]) > 0)
+        {
+            g_object_set(webrtcbin, "stun-server",hub->stuns[i],NULL);
+            return;
+        }
+    }
 }
+

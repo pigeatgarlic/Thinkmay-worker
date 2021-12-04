@@ -31,6 +31,7 @@
 #include <error-code.h>
 #include <message-form.h>
 #include <global-var.h>
+#include <token-validate.h>
 
 /// <summary>
 /// agent object 
@@ -90,16 +91,11 @@ server_callback (SoupServer        *server,
 	{
 		if(!g_strcmp0(name,"Authorization"))
 		{
-			request_token = value;
-		}
-	}
-
-	if(DEVICE_TOKEN)
-	{
-		if(g_strcmp0(value,DEVICE_TOKEN))
-		{
-			soup_message_set_status(msg,SOUP_STATUS_UNAUTHORIZED);
-			return;
+			if(!validate_token(value))
+			{
+				msg->status_code = SOUP_STATUS_UNAUTHORIZED;
+				return;
+			}
 		}
 	}
 

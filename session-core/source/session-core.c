@@ -21,6 +21,7 @@
 #include <logging.h>
 #include <message-form.h>
 #include <global-var.h>
+#include <token-validate.h>
 
 
 #include <glib.h>
@@ -138,17 +139,17 @@ session_core_setup_session(SessionCore* self)
 		JsonObject* json_infor = get_json_object_from_string(infor_message->response_body->data,error,parser);
 
 		signalling_hub_setup(self->hub,
-			json_object_get_string_member(json_infor,"turnConnection"),
-			json_object_get_string_member(json_infor,"SignallingUrl"),
-			json_object_get_array_member(json_infor,"stuns")
+			json_object_get_string_member(json_infor,"turn"),
+			json_object_get_string_member(json_infor,"signallingurl"),
+			json_object_get_array_member(json_infor,"stuns"),
 			token_message->response_body->data);
 
 		qoe_setup(self->qoe,
-					json_object_get_int_member(json_infor,"ScreenWidth"),
-					json_object_get_int_member(json_infor,"ScreenHeight"),
-					json_object_get_int_member(json_infor,"AudioCodec"),
-					json_object_get_int_member(json_infor,"VideoCodec"),
-					json_object_get_int_member(json_infor,"QoEMode"));
+					json_object_get_int_member(json_infor,"screenwidth"),
+					json_object_get_int_member(json_infor,"screenheight"),
+					json_object_get_int_member(json_infor,"audiocodec"),
+					json_object_get_int_member(json_infor,"videocodec"),
+					json_object_get_int_member(json_infor,"mode"));
 		g_object_unref(parser);
 	}
 	else 
@@ -215,17 +216,20 @@ server_callback (SoupServer        *server,
 			msg->status_code = SOUP_STATUS_OK;
 			return;
 		}
-		if(!g_strcmp0(name,"Authorization") &&
-		   !g_strcmp0(value,DEVICE_TOKEN))
-		{
-			if(!g_strcmp0(uri->path,"/agent/message"))
+		if(!g_strcmp0(name,"Authorization"))
+		{ 
+			if(!validate_token(value))
 			{
-				msg->status_code = SOUP_STATUS_OK;
+				msg->status_code = SOUP_STATUS_UNAUTHORIZED;
 				return;
 			}
 		}
 	}
-	msg->status_code = SOUP_STATUS_UNAUTHORIZED;
+	if(!g_strcmp0(uri->path,"/agent/message"))
+	{
+		msg->status_code = SOUP_STATUS_OK;
+		return;
+	}
 }
 
 

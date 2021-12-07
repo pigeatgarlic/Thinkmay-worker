@@ -48,7 +48,7 @@ handle_powershell_output(GBytes* output,
     ShellSession* session = (ShellSession*) data;
     gchar* buffer = g_bytes_get_data(output,&size);
     soup_message_set_response(session->message,
-        "application/text",SOUP_MEMORY_COPY,buffer,size);
+        "application/json",SOUP_MEMORY_COPY,buffer,size);
 }
 
 void

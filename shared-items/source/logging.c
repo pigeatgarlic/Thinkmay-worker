@@ -38,11 +38,6 @@ worker_log_output(gchar* text)
     gchar* log_url = g_string_free(string,FALSE);
     SoupMessage* message = soup_message_new(SOUP_METHOD_POST,log_url);
 
-    // add token if present
-    if(DEVICE_TOKEN)
-        soup_message_headers_append(message->request_headers,"Authorization",DEVICE_TOKEN);
-
-
     // copy from buffer to soup message
     soup_message_set_request(message,"application/text",
         SOUP_MEMORY_COPY,text,strlen(text));

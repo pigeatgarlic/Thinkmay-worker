@@ -54,25 +54,25 @@ struct _SignallingHub
      * @brief 
      * 
      */
-    gchar* signalling_server;
+    gchar signalling_server[100];
 
     /**
      * @brief 
      * turn connection of the session 
      */
-	gchar* turn;
+	gchar turn[200];
 
     /**
      * @brief 
      * remote token use to establish connection with client
      */
-    gchar* remote_token;
+    gchar remote_token[500];
 
     /**
      * @brief 
      * list of stun server
      */
-    gchar stuns[50][10];
+    gchar stuns[10][50];
 };
 
 
@@ -86,6 +86,7 @@ SignallingHub*
 signalling_hub_initialize(SessionCore* core)
 {
     SignallingHub* hub = malloc(sizeof(SignallingHub));
+    memset(hub, 0, sizeof(SignallingHub));
     return hub;
 }
 
@@ -103,7 +104,7 @@ handle_stun_list(JsonArray* stun_array,
     memcpy(hub->stuns[index], stun_url, strlen(stun_url));
 }
 
-
+ 
 void
 signalling_hub_setup(SignallingHub* hub, 
                      gchar* turn,
@@ -111,9 +112,9 @@ signalling_hub_setup(SignallingHub* hub,
                      JsonArray* stun_array,
                      gchar* remote_token)
 {
-    hub->remote_token = remote_token;
-    hub->signalling_server = url;
-    hub->turn = turn;
+    memcpy(hub->remote_token, remote_token,strlen(remote_token));
+    memcpy(hub->signalling_server, url,strlen(url));
+    memcpy(hub->turn, turn,strlen(turn));
     json_array_foreach_element(stun_array,
         (JsonArrayForeach)handle_stun_list,(gpointer)hub);
 }
@@ -306,6 +307,8 @@ on_answer_created(GstPromise* promise,
     gst_promise_unref(promise);
 
     promise = gst_promise_new();
+
+    if(!answer || !answer->sdp || !answer->type) {return;}
 
     g_signal_emit_by_name( pipeline_get_webrtc_bin(pipe),
         "set-local-description", answer, promise);
@@ -550,7 +553,6 @@ on_server_message(SoupWebsocketConnection* conn,
     } else if (!g_strcmp0(RequestType, "REQUEST_STREAM")) {
         setup_pipeline(core);
     }
-    g_object_unref(parser);
     g_free(text);
 }
 

@@ -23,6 +23,9 @@
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
 
+
+#define WRITE_TOKEN_TO_FILE TRUE
+
 /// <summary>
 /// contain information about websocket socket with host
 /// </summary>
@@ -101,6 +104,18 @@ register_with_host(AgentServer* agent)
         JsonParser* parser = json_parser_new();
         JsonObject* result_json = get_json_object_from_string(soupMessage->response_body->data,&error,parser);
         gchar* token_result = json_object_get_string_member(result_json,"token");
+
+        if(WRITE_TOKEN_TO_FILE)
+        {
+            GFile* file = g_file_new_for_path("./remote-token");
+            g_file_delete(file,NULL,NULL);
+            file = g_file_new_for_path("./remote-token");
+            GFileOutputStream* stream = g_file_append_to(file,G_FILE_CREATE_REPLACE_DESTINATION,NULL,NULL);
+            GOutputStream* output_Stream = (GOutputStream*)stream;
+            g_output_stream_write_all(output_Stream,token_result,strlen(token_result),
+                NULL,NULL,NULL);
+        }
+
         if(token_result) 
         { 
             memcpy(DEVICE_TOKEN,token_result,strlen(token_result));

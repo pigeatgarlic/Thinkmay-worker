@@ -20,7 +20,9 @@ validate_token(const gchar* token)
     g_string_append(token_url, token);
     gchar* token_str = g_string_free(token_url,FALSE);
 
-    SoupMessage* message = soup_message_new(SOUP_METHOD_GET,token_str);
+    SoupMessage* message = soup_message_new(SOUP_METHOD_POST,token_str);
+    soup_message_set_request(message,"application/json",SOUP_MEMORY_COPY
+        ,NULL,0);
 
     soup_session_send_message(session,message);
 

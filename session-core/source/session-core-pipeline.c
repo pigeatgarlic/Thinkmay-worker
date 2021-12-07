@@ -270,6 +270,37 @@ setup_element_factory(SessionCore* core,
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audioencoder");
         }
     }
+
+
+    if(!pipe->pipeline)
+    {
+        pipe->pipeline =
+            gst_parse_launch("webrtcbin bundle-policy=max-bundle name=sendrecv "
+                "d3d11desktopdupsrc name=screencap ! "DIRECTX_PAD",framerate=60/1 ! "
+                "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! "
+                "d3d11convert ! "DIRECTX_PAD",format=NV12 ! "
+                "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! "
+                "mfh264enc name=videoencoder ! video/x-h264,profile=high ! "
+                "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! "
+                "rtph264pay name=rtp ! "
+                "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                RTP_CAPS_VIDEO "H264 ! sendrecv. "
+                "wasapisrc name=audiocapsrc name=audiocapsrc ! audioconvert ! audioresample ! queue ! "
+                "opusenc name=audioencoder ! rtpopuspay ! "
+                "queue ! " RTP_CAPS_OPUS "OPUS ! sendrecv. ", &error);
+
+        pipe->audio_element[WASAPI_SOURCE_SOUND] = 
+            gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audiocapsrc");
+        pipe->video_element[H264_MEDIA_FOUNDATION] = 
+            gst_bin_get_by_name(GST_BIN(pipe->pipeline), "videoencoder");
+        pipe->video_element[RTP_H264_PAYLOAD] = 
+            gst_bin_get_by_name(GST_BIN(pipe->pipeline), "rtp");
+        pipe->video_element[DIRECTX_SCREEN_CAPTURE_SOURCE] = 
+            gst_bin_get_by_name(GST_BIN(pipe->pipeline), "screencap");
+        pipe->audio_element[OPUS_ENCODER] = 
+            gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audioencoder");
+
+    }
     if (!error == NULL) {
         session_core_finalize(core,error);
     }

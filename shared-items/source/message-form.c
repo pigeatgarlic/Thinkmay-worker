@@ -34,11 +34,9 @@ get_json_object_from_string(gchar* string,
 {
     JsonNode* root;
 	json_parser_load_from_data(parser, string, -1, error);
-    if((*error))
-    {
-        return NULL;
-    }
 	root = json_parser_get_root(parser);
+    if(!root)
+        return NULL;
     return json_node_get_object(root);
 }
 

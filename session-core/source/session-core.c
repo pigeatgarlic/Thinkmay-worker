@@ -95,8 +95,6 @@ void	   server_callback (SoupServer        *server,
 
 
 
-
-
 /**
  * @brief 
  * setup session by request input from database with worker token given by agent
@@ -105,44 +103,84 @@ void	   server_callback (SoupServer        *server,
 static void
 session_core_setup_session(SessionCore* self)
 {
-    const char* http_aliases[] = { "http", NULL };
-	SoupSession* session = soup_session_new_with_options(
+	JsonParser* token_parser = json_parser_new();
+	gchar* remote_token;
+	if(USE_DEFAULT_TOKEN)
+	{
+		remote_token = DEFAULT_SESSION_TOKEN;
+	}
+	else
+	{
+		const char* http_aliases[] = { "http", NULL };
+		SoupSession* http_session = soup_session_new_with_options(
+				SOUP_SESSION_SSL_STRICT, FALSE,
+				SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
+				SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
+
+		GString* token_url= g_string_new("http://");
+		g_string_append(token_url,	CLUSTER_IP);
+		g_string_append(token_url,":5000/session/token");
+		gchar* token_str = g_string_free(token_url,FALSE);
+
+		worker_log_output("getting remote token from server\n");
+		worker_log_output(token_str);
+
+
+		SoupMessage* token_message = soup_message_new(SOUP_METHOD_GET,token_str);
+
+
+		worker_log_output("registering with device token\n");
+		worker_log_output(DEVICE_TOKEN);
+
+		soup_message_headers_append(token_message->request_headers,
+			"Authorization",DEVICE_TOKEN);
+		soup_session_send_message(http_session,token_message);
+
+		if(token_message->status_code == SOUP_STATUS_OK )
+		{
+			GError* error = NULL;
+			JsonObject* json_infor = get_json_object_from_string(infor_message->response_body->data,error,token_parser);
+			remote_token = json_object_get_string_member(json_infor,"token");
+		}
+		else 
+		{
+			g_printerr ("got response code %d\n",token_message->status_code);
+			GError* error = malloc(sizeof(GError));
+			error->message = "fail to get session information";
+			session_core_finalize(self,error);
+			return;
+		}
+	}
+
+
+    const char* https_aliases[] = { "https", NULL };
+	SoupSession* https_session = soup_session_new_with_options(
 			SOUP_SESSION_SSL_STRICT, FALSE,
 			SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
-			SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
+			SOUP_SESSION_HTTPS_ALIASES, https_aliases, NULL);
 		
-	GString* infor_url = g_string_new("http://");
-	g_string_append(infor_url,	CLUSTER_IP);
-	g_string_append(infor_url,":5000/session/infor");
+	GString* infor_url = g_string_new(SESSION_INFOR_VALIDATE_URL);
+	g_string_append(infor_url,	"?token=");
+	g_string_append(infor_url,	remote_token);
 
-	GString* token_url= g_string_new("http://");
-	g_string_append(token_url,	CLUSTER_IP);
-	g_string_append(token_url,":5000/session/token");
 
 	gchar* infor_str = g_string_free(infor_url,FALSE);
-	gchar* token_str = g_string_free(token_url,FALSE);
-
 	SoupMessage* infor_message = soup_message_new(SOUP_METHOD_GET,infor_str);
-	SoupMessage* token_message = soup_message_new(SOUP_METHOD_GET,token_str);
 
-	soup_message_headers_append(token_message->request_headers,"Authentication",DEVICE_TOKEN);
-	soup_message_headers_append(infor_message->request_headers,"Authentication",DEVICE_TOKEN);
+	soup_session_send_message(https_session,infor_message);
 
-	soup_session_send_message(session,infor_message);
-	soup_session_send_message(session,token_message);
 
-	if(infor_message->status_code == SOUP_STATUS_OK &&
-	   token_message->status_code == SOUP_STATUS_OK )
+	if(infor_message->status_code == SOUP_STATUS_OK)
 	{
 		GError* error = NULL;
 		JsonParser* parser = json_parser_new();
 		JsonObject* json_infor = get_json_object_from_string(infor_message->response_body->data,error,parser);
 
-		signalling_hub_setup(self->hub,
+		signalling_hub_setup(self->signalling,
 			json_object_get_string_member(json_infor,"turn"),
 			json_object_get_string_member(json_infor,"signallingurl"),
 			json_object_get_array_member(json_infor,"stuns"),
-			token_message->response_body->data);
+			remote_token);
 
 		qoe_setup(self->qoe,
 					json_object_get_int_member(json_infor,"screenwidth"),
@@ -212,7 +250,7 @@ server_callback (SoupServer        *server,
 		{
 			gchar* response = "ping";
 			soup_message_set_response(msg,
-				"application/text",SOUP_MEMORY_COPY,response,strlen(response));
+				"application/json",SOUP_MEMORY_COPY,response,strlen(response));
 			msg->status_code = SOUP_STATUS_OK;
 			return;
 		}

@@ -89,6 +89,8 @@ gboolean
 session_reconnect(AgentServer* agent)
 {
     RemoteSession* session = agent_get_remote_session(agent);
+
+    // return false if session core is already running
     if(session->process)
         return FALSE;
 
@@ -105,6 +107,7 @@ session_reconnect(AgentServer* agent)
         (ChildStdOutHandle)handle_session_core_output,
         (ChildStateHandle)handler_session_core_state_function, agent,NULL);
 
+    // return false if session core is not running after child process initialize
     if(!session->process)
         return FALSE;
     else    
@@ -115,29 +118,40 @@ gboolean
 session_disconnect(AgentServer* agent)
 {
     RemoteSession* session = agent_get_remote_session(agent);
+
+    // return false if child process is not running before disconnect
     if(!session->process)
         return FALSE;
+
     childprocess_force_exit(session->process);
     clean_childprocess(session->process);
     session->process = NULL;
+    return TRUE;
 }
 
 gboolean
 session_terminate(AgentServer* agent)
 {
     RemoteSession* session = agent_get_remote_session(agent);
+
+    // return true if session core is not running before termination
     if(!session->process)
-        return FALSE;
+        return TRUE;
 
     childprocess_force_exit(session->process);
     clean_childprocess(session->process);
     session->process = NULL;
+
+    // return true 
+    return TRUE;
 }
 
 gboolean
 session_initialize(AgentServer* agent)
 {
     RemoteSession* session = agent_get_remote_session(agent);
+
+    // return false if session core is running before the initialization
     if(session->process)
         return FALSE;
 
@@ -168,7 +182,7 @@ send_message_to_core(AgentServer* agent,
     SoupMessage* message = soup_message_new(SOUP_METHOD_POST,session->session_core_url);
     soup_message_headers_append(message->request_headers,"Authorization",DEVICE_TOKEN);
 
-    soup_message_set_request(message,"application/text",SOUP_MEMORY_COPY,
+    soup_message_set_request(message,"application/json",SOUP_MEMORY_COPY,
         buffer,strlen(buffer)); 
 
     soup_session_send_async(session->session,message,NULL,NULL,NULL);

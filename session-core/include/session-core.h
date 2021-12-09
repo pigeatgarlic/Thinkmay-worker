@@ -13,6 +13,7 @@
 #include <session-core-type.h>
 #include <error-code.h>
 #include <message-form.h>
+#include <human-interface-opcode.h>
 
 
 
@@ -95,5 +96,17 @@ void			report_session_core_error				(SessionCore* self,
  * @return gchar* remote token get from cluster
  */
 gchar*			session_core_get_remote_token			(SessionCore* self);
+
+
+
+
+/**
+ * @brief 
+ * get client device of current stream
+ * @param app 
+ * @return DeviceType 
+ */
+DeviceType		session_core_get_client_device			(SessionCore* self);
+
 
 #endif 

@@ -23,6 +23,7 @@
 #include <global-var.h>
 #include <token-validate.h>
 #include <development.h>
+#include <human-interface-opcode.h>
 
 
 #include <glib.h>
@@ -71,8 +72,11 @@ struct _SessionCore
 	 */
 	QoE* qoe;
 
-
-	
+	/**
+	 * @brief 
+	 * 
+	 */
+	DeviceType peer_device;
 };
 
 
@@ -173,6 +177,8 @@ session_core_setup_session(SessionCore* self)
 					OPUS_ENC,
 					CODEC_H265,
 					HIGH_CONST);
+		
+		self->peer_device = WINDOW_APP;
 	}
 	else
 	{
@@ -388,4 +394,10 @@ SignallingHub*
 session_core_get_signalling_hub(SessionCore* core)
 {
 	return core->signalling;
+}
+
+DeviceType		
+session_core_get_client_device(SessionCore* self)
+{
+	return self->peer_device;
 }

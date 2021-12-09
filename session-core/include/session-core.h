@@ -85,7 +85,7 @@ SignallingHub*	session_core_get_signalling_hub			(SessionCore* self);
  * @param code 
  */
 void			report_session_core_error				(SessionCore* self,
-														 ErrorCode code);
+														 gchar* code);
 
 
 /**

@@ -30,9 +30,29 @@ typedef enum
 
 	KEYRESET,
 	QOE_REPORT
+}JavaScriptOpcode;
+
+typedef enum
+{
+	KEYRAW,
+	MOUSERAW,
+
+	MOUSE_WHEEL,
+
+	GAMEPAD_IN,
+	GAMEPAD_OUT,
+}Win32Opcode;
 
 
-}HidOpcode;
+typedef enum 
+{
+	WEB_APP,
+	WINDOW_APP,
+	LINUX_APP,
+	MAC_OS_APP,
+	ANDROID_APP,
+	IOS_APP
+}DeviceType;
 
 
 #endif

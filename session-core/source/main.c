@@ -1,6 +1,8 @@
 #include <session-core.h>
 #include <session-core-type.h>
 
+#include <development.h>
+
 #include <gst/gst.h>
 #include <glib-2.0/glib.h>
 #include <global-var.h>
@@ -42,22 +44,22 @@ main(int argc, char* argv[])
         return -1;
     }
 
-    if(USE_DEFAULT_DEVICE_TOKEN)
-    {
-        DEVICE_TOKEN = DEFAULT_DEVICE_TOKEN;
-    }
-    if (USE_DEFAULT_CLUSTER_IP)
-    {
-        CLUSTER_IP = "192.168.1.12";
-    }
 
-
-    g_print("session core start with cluster manager url\n");
-    g_print(CLUSTER_IP);
-    g_print("\n");
-    g_print("session core start with worker token\n");
-    g_print(DEVICE_TOKEN);
-    g_print("\n");
+    if(!DEVELOPMENT_ENVIRONMENT)
+    {
+        g_print("session core start with cluster manager url\n");
+        g_print(CLUSTER_IP);
+        g_print("\n");
+        g_print("session core start with worker token\n");
+        g_print(DEVICE_TOKEN);
+        g_print("\n");
+    }
+    else
+    {
+        g_print("Starting in development environment\n");
+        
+    }
+    
 
     session_core_initialize();
 

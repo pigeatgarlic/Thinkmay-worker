@@ -20,7 +20,6 @@
 #define         SIGNALLING_ERROR                "Signalling error"
 
 
-typedef         gchar*                          ErrorCode;
 
 #define         UNDEFINED_ERROR                 "UndefinedError"
 #define         AGENT_STATE_CONFLICT            "Agent state conflict"

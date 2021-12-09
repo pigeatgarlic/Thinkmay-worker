@@ -18,6 +18,7 @@
 #include <error-code.h>
 #include <signalling-message.h>
 #include <global-var.h>
+#include <development.h>
 
 #include <gst/gst.h>
 #include <glib-2.0/glib.h>
@@ -105,7 +106,6 @@ handle_stun_list(JsonArray* stun_array,
     memcpy(hub->stuns[index], stun_url, strlen(stun_url));
 }
 
-#define DEFAULT_TURN "turn://coturnuser:coturnpassword@turn:18.138.254.172:3478"
 void
 signalling_hub_setup(SignallingHub* hub, 
                      gchar* turn,
@@ -123,11 +123,20 @@ signalling_hub_setup(SignallingHub* hub,
 		worker_log_output("starting remote session with turn server");
 		worker_log_output(turn);
     }
+
     memcpy(hub->remote_token, remote_token,strlen(remote_token));
     memcpy(hub->signalling_server, url,strlen(url));
     memcpy(hub->turn, turn,strlen(turn));
-    json_array_foreach_element(stun_array,
-        (JsonArrayForeach)handle_stun_list,(gpointer)hub);
+
+    if(stun_array)
+    {
+        json_array_foreach_element(stun_array,
+            (JsonArrayForeach)handle_stun_list,(gpointer)hub);
+    }
+    else
+    {
+        worker_log_output("no stun server found, setting default value\n");
+    }
 }
 
 

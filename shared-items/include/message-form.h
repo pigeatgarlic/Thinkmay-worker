@@ -24,7 +24,7 @@
  * @param object 
  * @return gchar* 
  */
-gchar*              get_string_from_json_object (JsonObject* object);
+gchar*              get_string_from_json_object     (JsonObject* object);
 
 /**
  * @brief Get the json object from string object
@@ -34,9 +34,9 @@ gchar*              get_string_from_json_object (JsonObject* object);
  * @param parser json parser, remember to init and free before and after use
  * @return JsonObject* json object
  */
-JsonObject*            get_json_object_from_string(gchar* string,
-                                                GError** error,
-                                                JsonParser* parser);
+JsonObject*            get_json_object_from_string  (gchar* string,
+                                                    GError** error,
+                                                    JsonParser* parser);
 
 
 
@@ -48,6 +48,6 @@ JsonObject*            get_json_object_from_string(gchar* string,
  * @return JsonObject* result 
  */
 JsonObject*            get_json_object_from_file   (gchar* file_name,
-                                                 GError** error);
+                                                    GError** error);
 
 #endif

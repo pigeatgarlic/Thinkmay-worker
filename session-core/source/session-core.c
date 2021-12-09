@@ -139,7 +139,7 @@ session_core_setup_session(SessionCore* self)
 		if(token_message->status_code == SOUP_STATUS_OK )
 		{
 			GError* error = NULL;
-			JsonObject* json_infor = get_json_object_from_string(infor_message->response_body->data,error,token_parser);
+			JsonObject* json_infor = get_json_object_from_string(token_message->response_body->data,error,token_parser);
 			remote_token = json_object_get_string_member(json_infor,"token");
 		}
 		else 
@@ -152,6 +152,9 @@ session_core_setup_session(SessionCore* self)
 		}
 	}
 
+
+	worker_log_output("got remote token\n");
+	worker_log_output(remote_token);
 
     const char* https_aliases[] = { "https", NULL };
 	SoupSession* https_session = soup_session_new_with_options(
@@ -175,6 +178,7 @@ session_core_setup_session(SessionCore* self)
 		GError* error = NULL;
 		JsonParser* parser = json_parser_new();
 		JsonObject* json_infor = get_json_object_from_string(infor_message->response_body->data,error,parser);
+
 
 		signalling_hub_setup(self->signalling,
 			json_object_get_string_member(json_infor,"turn"),

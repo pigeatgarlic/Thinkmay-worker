@@ -508,6 +508,7 @@ setup_pipeline(SessionCore* core)
 
     g_signal_connect(pipe->webrtcbin, "pad-added", 
        G_CALLBACK(on_incoming_stream),pipe->pipeline);
+
     gst_element_change_state(pipe->pipeline, GST_STATE_READY);
     connect_data_channel_signals(core);
     start_pipeline(core);

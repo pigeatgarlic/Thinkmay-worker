@@ -8,6 +8,7 @@
  * @copyright Copyright (c) 2021
  * 
  */
+
 #include <session-core-signalling.h>
 #include <session-core.h>
 #include <session-core-pipeline.h>
@@ -104,7 +105,7 @@ handle_stun_list(JsonArray* stun_array,
     memcpy(hub->stuns[index], stun_url, strlen(stun_url));
 }
 
- 
+#define DEFAULT_TURN "turn://coturnuser:coturnpassword@turn:18.138.254.172:3478"
 void
 signalling_hub_setup(SignallingHub* hub, 
                      gchar* turn,
@@ -112,6 +113,16 @@ signalling_hub_setup(SignallingHub* hub,
                      JsonArray* stun_array,
                      gchar* remote_token)
 {
+    if(!g_strcmp0(turn,"turn://:@turn::3478"))
+    {
+		worker_log_output("Fail to get turn server, setting default value");
+        turn = DEFAULT_TURN;
+    }
+    else
+    {
+		worker_log_output("starting remote session with turn server");
+		worker_log_output(turn);
+    }
     memcpy(hub->remote_token, remote_token,strlen(remote_token));
     memcpy(hub->signalling_server, url,strlen(url));
     memcpy(hub->turn, turn,strlen(turn));
@@ -128,7 +139,6 @@ send_message_to_signalling_server(SignallingHub* signalling,
     JsonObject* json_object = json_object_new();
     json_object_set_string_member(json_object, REQUEST_TYPE, request_type);
     json_object_set_string_member(json_object, CONTENT, content);
-    json_object_set_string_member(json_object, RESULT, SESSION_ACCEPTED);
 
     
     gchar* buffer = get_string_from_json_object(json_object);
@@ -308,7 +318,7 @@ on_answer_created(GstPromise* promise,
 
     promise = gst_promise_new();
 
-    if(!answer || !answer->sdp || !answer->type) {return;}
+    // if(!answer || !answer->sdp || !answer->type) {return;}
 
     g_signal_emit_by_name( pipeline_get_webrtc_bin(pipe),
         "set-local-description", answer, promise);
@@ -528,6 +538,7 @@ on_server_message(SoupWebsocketConnection* conn,
             const char* data = g_bytes_get_data(message, &size);
             /* Convert to NULL-terminated string */
             text = g_strndup(data, size);
+            worker_log_output(text);
             break;
         }
         default:

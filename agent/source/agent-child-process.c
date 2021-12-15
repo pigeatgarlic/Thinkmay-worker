@@ -95,12 +95,12 @@ read_std_pipe_async(ChildProcess* proc,
                     ChildStdErrHandle handle)
 {
     DWORD dwWritten = 0;
-    gchar buffer_stdout[500] = {0};
-    memset(buffer_stdout, 0, 500);
+    gchar buffer_stdout[1000] = {0};
+    memset(buffer_stdout, 0, 1000);
     OVERLAPPED overlap;
     overlap.Offset = 0;
     overlap.OffsetHigh = 0;
-    ReadFile(pipe, buffer_stdout, 500, &dwWritten,NULL);
+    ReadFile(pipe, buffer_stdout, 1000, &dwWritten,NULL);
     if(dwWritten && *buffer_stdout) {
         GBytes* byte = g_bytes_new(buffer_stdout, strlen(buffer_stdout));
         handle(byte, proc->agent, proc->data);

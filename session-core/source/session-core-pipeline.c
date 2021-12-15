@@ -301,14 +301,13 @@ setup_element_factory(SessionCore* core,
             gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audioencoder");
 
     }
-    if (!error == NULL) {
+    if (error) {
         session_core_finalize(core,error);
     }
     pipe->webrtcbin =
         gst_bin_get_by_name(GST_BIN(pipe->pipeline), "sendrecv");
-
+    
 }
-
 
 static void
 handle_media_stream (GstPad * pad, GstElement * pipe, const char *convert_name,

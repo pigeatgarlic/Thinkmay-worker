@@ -77,6 +77,12 @@ struct _SessionCore
 	 * 
 	 */
 	DeviceType peer_device;
+
+	/**
+	 * @brief 
+	 * 
+	 */
+	CoreEngine peer_engine;
 };
 
 
@@ -221,6 +227,10 @@ session_core_setup_session(SessionCore* self)
 						json_object_get_int_member(json_infor,"audiocodec"),
 						json_object_get_int_member(json_infor,"videocodec"),
 						json_object_get_int_member(json_infor,"mode"));
+			
+
+			self->peer_device =	json_object_get_int_member(json_infor,"clientdevice");
+			self->peer_engine =	json_object_get_int_member(json_infor,"clientengine");
 			g_object_unref(parser);
 		}
 		else 

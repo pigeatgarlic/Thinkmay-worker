@@ -54,5 +54,9 @@ typedef enum
 	IOS_APP
 }DeviceType;
 
-
+typedef enum 
+{
+	GSTREAMER,
+	CHROME
+}CoreEngine;
 #endif

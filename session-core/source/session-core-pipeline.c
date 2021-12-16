@@ -494,6 +494,16 @@ setup_pipeline(SessionCore* core)
     SignallingHub* signalling = session_core_get_signalling_hub(core);
     Pipeline* pipe = session_core_get_pipeline(core);
     QoE* qoe= session_core_get_qoe(core);
+    
+    GstDeviceMonitor* monitor = gst_device_monitor_new();
+    if(!gst_device_monitor_start(monitor))
+    {
+        worker_log_output("WARNING: Monitor couldn't started!!\n");
+    }
+
+    worker_log_output("Searching for available device");
+    GList* device_list = gst_device_monitor_get_devices(monitor);
+    g_list_foreach(device_list,(GFunc)device_foreach,pipe);
 
     setup_element_factory(core, 
         qoe_get_video_codec(qoe),

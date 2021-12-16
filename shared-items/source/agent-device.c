@@ -10,7 +10,6 @@
  */
 #include <winsock2.h>
 #include <agent-device.h>
-#include <agent-server.h>
 
 #include <logging.h>
 #include <message-form.h>
@@ -87,14 +86,14 @@ get_local_ip()
 /// <summary>
 /// Information about slave hardware configuration
 /// </summary>
-struct _DeviceInformation
+typedef struct _DeviceInformation
 {
 	gchar cpu[100];
 	gchar gpu[512];
 	gint ram_capacity;
 	gchar OS[100];
 	gchar IP[100];
-};
+}DeviceInformation;
 
 
 

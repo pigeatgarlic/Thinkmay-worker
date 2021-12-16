@@ -16,9 +16,26 @@
 #include <libsoup/soup.h>
 #include <global-var.h>
 #include <development.h>
+#include <agent-device.h>
 
 
 
+void 
+on_log_finished(GObject *object,
+                GAsyncResult *res,
+                gpointer user_data)
+{
+    GError* error = NULL;
+    SoupMessage* message = (SoupMessage*) user_data;
+    GInputStream* stream = soup_session_send_finish(object,res,&error);
+
+    if(error)
+        g_print("%s\n",error->message);
+    
+    if(message->status_code == SOUP_STATUS_BAD_REQUEST)
+        g_print("log success with result code: %d:\n%s\n",message->status_code,message->response_body->data);
+    
+}
 
 
 
@@ -29,9 +46,6 @@ worker_log_output(gchar* text)
 
     if(!DEVELOPMENT_ENVIRONMENT)
     {
-        if(!strlen(DEVICE_TOKEN))
-            return;
-
         const gchar* http_aliases[] = { "http", NULL };
         SoupSession* session = soup_session_new_with_options(
                 SOUP_SESSION_SSL_STRICT, FALSE,
@@ -39,27 +53,25 @@ worker_log_output(gchar* text)
                 SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
 
         // get log url from clusterip
-        GString* string = g_string_new("http://");
-        g_string_append(string,CLUSTER_IP);
-        g_string_append(string,":5000/log");
-        gchar* log_url = g_string_free(string,FALSE);
+        GString* url= g_string_new("http://");
+        g_string_append(url,CLUSTER_IP);
+        g_string_append(url,":5000/log?ip=");
+        g_string_append(url,get_local_ip());
+        gchar* log_url = g_string_free(url,FALSE);
         SoupMessage* message = soup_message_new(SOUP_METHOD_POST,log_url);
 
 
 
+        GString* string =  g_string_new("\"");
+        g_string_append(string,text);
+        g_string_append(string,"\"");
+        gchar* body = g_string_free(string,FALSE);
 
 
         // copy from buffer to soup message
-        soup_message_set_request(message,"application/json",
-            SOUP_MEMORY_COPY,text,strlen(text));
+        soup_message_set_request(message,"application/json",SOUP_MEMORY_COPY,
+            body,strlen(body));
 
-
-        soup_session_send_async(session,message,NULL,NULL,NULL);    
-    }
-
-    if(g_utf8_validate(text,-1,NULL))
-    {
-        g_print(text);
-        g_print("\n");
+        soup_session_send_async(session,message,NULL,(GAsyncReadyCallback)on_log_finished,message);    
     }
 }                  

@@ -108,5 +108,13 @@ gchar*			session_core_get_remote_token			(SessionCore* self);
  */
 DeviceType		session_core_get_client_device			(SessionCore* self);
 
+/**
+ * @brief 
+ * 
+ * @param self 
+ * @return CoreEngine 
+ */
+CoreEngine 		session_core_get_client_engine			(SessionCore* self);
+
 
 #endif 

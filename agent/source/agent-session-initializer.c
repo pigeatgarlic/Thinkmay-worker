@@ -73,7 +73,6 @@ handle_session_core_error(GBytes* buffer,
     gpointer data)
 {
     gchar* message = g_bytes_get_data(buffer, NULL);
-    worker_log_output(message);
 }
 
 static void
@@ -82,7 +81,6 @@ handle_session_core_output(GBytes* buffer,
     gpointer data)
 {
     gchar* message = g_bytes_get_data(buffer, NULL);
-    worker_log_output(message);
 }
 
 gboolean

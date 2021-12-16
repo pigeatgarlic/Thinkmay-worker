@@ -411,3 +411,9 @@ session_core_get_client_device(SessionCore* self)
 {
 	return self->peer_device;
 }
+
+CoreEngine
+session_core_get_client_engine(SessionCore* self)
+{
+	return self->peer_engine;
+}

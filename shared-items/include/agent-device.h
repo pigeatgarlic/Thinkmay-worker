@@ -18,7 +18,6 @@
 #include <d3d9.h>
 #include <intrin.h>
 #include <glib.h>
-#include <agent-type.h>
 
 
 
@@ -37,5 +36,11 @@ gchar*                  get_registration_message        ();
 
 
 
+/**
+ * @brief Get the local ip object
+ * 
+ * @return gchar* 
+ */
+gchar*                  get_local_ip                    ();
 
 #endif

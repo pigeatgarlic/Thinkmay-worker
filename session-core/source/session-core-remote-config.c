@@ -25,7 +25,7 @@
 
 
 
-struct _QoE
+struct _StreamConfig
 {
 	/**
 	 * @brief 
@@ -60,12 +60,12 @@ struct _QoE
 };
 
 
-QoE*
+StreamConfig*
 qoe_initialize()
 {
-	static QoE qoe;
-	memset(&qoe, 0, sizeof(QoE));
-	return &qoe;
+	StreamConfig* config = malloc(sizeof(StreamConfig));
+	memset(config, 0, sizeof(StreamConfig));
+	return config;
 }
 
 
@@ -92,7 +92,7 @@ display_setting_get_and_set(gint* screen_width,
 
 
 void
-qoe_setup(QoE* qoe,
+qoe_setup(StreamConfig* qoe,
 		  gint screen_width,
 		  gint screen_height,
 		  Codec audio_codec,
@@ -118,25 +118,25 @@ qoe_setup(QoE* qoe,
 
 
 Codec
-qoe_get_audio_codec(QoE* qoe)
+qoe_get_audio_codec(StreamConfig* qoe)
 {
 	return qoe->codec_audio;
 }
 
 Codec
-qoe_get_video_codec(QoE* qoe)
+qoe_get_video_codec(StreamConfig* qoe)
 {
 	return qoe->codec_video;
 }
 
 gint 
-qoe_get_screen_width(QoE* qoe)
+qoe_get_screen_width(StreamConfig* qoe)
 {
 	return qoe->screen_width;
 }
 
 gint 
-qoe_get_screen_height(QoE* qoe)
+qoe_get_screen_height(StreamConfig* qoe)
 {
 	return qoe->screen_height;
 }

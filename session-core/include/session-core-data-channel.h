@@ -16,6 +16,16 @@
  */
 gboolean                connect_data_channel_signals                (SessionCore* core);
 
+
+
+/**
+ * @brief 
+ * 
+ * @param core 
+ * @return gboolean 
+ */
+gboolean                ping_remote_client                          (SessionCore* core);
+
 /**
  * @brief 
  * initialize webrtchub with default member

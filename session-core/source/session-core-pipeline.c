@@ -143,6 +143,7 @@ start_pipeline(SessionCore* core)
         session_core_finalize(core, &error);
     }
     worker_log_output("Starting pipeline");
+	start_qos_thread(core);
     return TRUE;
 }
 
@@ -368,91 +369,6 @@ setup_element_factory(SessionCore* core,
     
 }
 
-static void
-handle_media_stream (GstPad * pad, GstElement * pipe, const char *convert_name,
-    const char *sink_name)
-{
-  GstPad *qpad;
-  GstElement *q, *conv, *resample, *sink;
-  GstPadLinkReturn ret;
-
-
-  q = gst_element_factory_make ("queue", NULL);
-  g_assert_nonnull (q);
-  conv = gst_element_factory_make (convert_name, NULL);
-  g_assert_nonnull (conv);
-  sink = gst_element_factory_make (sink_name, NULL);
-  g_assert_nonnull (sink);
-
-  if (g_strcmp0 (convert_name, "audioconvert") == 0) {
-    /* Might also need to resample, so add it just in case.
-     * Will be a no-op if it's not required. */
-    resample = gst_element_factory_make ("audioresample", NULL);
-    g_assert_nonnull (resample);
-    gst_bin_add_many (GST_BIN (pipe), q, conv, resample, sink, NULL);
-    gst_element_sync_state_with_parent (q);
-    gst_element_sync_state_with_parent (conv);
-    gst_element_sync_state_with_parent (resample);
-    gst_element_sync_state_with_parent (sink);
-    gst_element_link_many (q, conv, resample, sink, NULL);
-  } else {
-    gst_bin_add_many (GST_BIN (pipe), q, conv, sink, NULL);
-    gst_element_sync_state_with_parent (q);
-    gst_element_sync_state_with_parent (conv);
-    gst_element_sync_state_with_parent (sink);
-    gst_element_link_many (q, conv, sink, NULL);
-  }
-
-  qpad = gst_element_get_static_pad (q, "sink");
-
-  ret = gst_pad_link (pad, qpad);
-  g_assert_cmphex (ret, ==, GST_PAD_LINK_OK);
-}
-
-static void
-on_incoming_decodebin_stream (GstElement * decodebin, GstPad * pad,
-    GstElement * pipe)
-{
-  GstCaps *caps;
-  const gchar *name;
-
-  if (!gst_pad_has_current_caps (pad)) {
-    g_printerr ("Pad '%s' has no caps, can't do anything, ignoring\n",
-        GST_PAD_NAME (pad));
-    return;
-  }
-
-  caps = gst_pad_get_current_caps (pad);
-  name = gst_structure_get_name (gst_caps_get_structure (caps, 0));
-
-  if (g_str_has_prefix (name, "video")) {
-    handle_media_stream (pad, pipe, "videoconvert", "autovideosink");
-  } else if (g_str_has_prefix (name, "audio")) {
-    handle_media_stream (pad, pipe, "audioconvert", "autoaudiosink");
-  } else {
-    g_printerr ("Unknown pad %s, ignoring", GST_PAD_NAME (pad));
-  }
-}
-
-static void
-on_incoming_stream (GstElement * webrtc, GstPad * pad, GstElement * pipe)
-{
-  GstElement *decodebin;
-  GstPad *sinkpad;
-
-  if (GST_PAD_DIRECTION (pad) != GST_PAD_SRC)
-    return;
-
-  decodebin = gst_element_factory_make ("decodebin", NULL);
-  g_signal_connect (decodebin, "pad-added",
-      G_CALLBACK (on_incoming_decodebin_stream), pipe);
-  gst_bin_add (GST_BIN (pipe), decodebin);
-  gst_element_sync_state_with_parent (decodebin);
-
-  sinkpad = gst_element_get_static_pad (decodebin, "sink");
-  gst_pad_link (pad, sinkpad);
-  gst_object_unref (sinkpad);
-}
 
 
 
@@ -536,7 +452,7 @@ setup_element_property(SessionCore* core)
 {
     Pipeline* pipe = session_core_get_pipeline(core);
     SignallingHub* hub = session_core_get_signalling_hub(core);
-    QoE* qoe = session_core_get_qoe(core);
+    StreamConfig* qoe = session_core_get_qoe(core);
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -616,7 +532,7 @@ setup_pipeline(SessionCore* core)
 {
     SignallingHub* signalling = session_core_get_signalling_hub(core);
     Pipeline* pipe = session_core_get_pipeline(core);
-    QoE* qoe= session_core_get_qoe(core);
+    StreamConfig* qoe= session_core_get_qoe(core);
     
 
 
@@ -629,8 +545,6 @@ setup_pipeline(SessionCore* core)
     connect_signalling_handler(core);
     setup_element_property(core);
 
-    g_signal_connect(pipe->webrtcbin, "pad-added", 
-       G_CALLBACK(on_incoming_stream),pipe->pipeline);
 
     gst_element_change_state(pipe->pipeline, GST_STATE_READY);
     connect_data_channel_signals(core);

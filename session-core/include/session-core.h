@@ -64,9 +64,9 @@ WebRTCHub*		session_core_get_rtc_hub				(SessionCore* self);
  * @brief 
  * get qoe from session core
  * @param self session core
- * @return QoE* qoe
+ * @return StreamConfig* qoe
  */
-QoE*			session_core_get_qoe					(SessionCore* self);
+StreamConfig*			session_core_get_qoe					(SessionCore* self);
 
 
 

@@ -18,10 +18,10 @@
 
 /**
  * @brief 
- * initialize QoE for the stream
- * @return QoE* 
+ * initialize StreamConfig for the stream
+ * @return StreamConfig* 
  */
-QoE*			qoe_initialize						();
+StreamConfig*			qoe_initialize						();
 
 /**
  * @brief 
@@ -33,7 +33,7 @@ QoE*			qoe_initialize						();
  * @param video_codec video codec that will be used for the stream
  * @param mode qoe mode that will be used during the stream
  */
-void 			qoe_setup							(QoE* qoe,
+void 			qoe_setup							(StreamConfig* qoe,
 													gint screen_width,
 													gint screen_height,
 													Codec audio_codec,
@@ -47,7 +47,7 @@ void 			qoe_setup							(QoE* qoe,
  * @param qoe 
  * @return Codec 
  */
-Codec			qoe_get_audio_codec					(QoE* qoe);
+Codec			qoe_get_audio_codec					(StreamConfig* qoe);
 
 /**
  * @brief 
@@ -55,7 +55,7 @@ Codec			qoe_get_audio_codec					(QoE* qoe);
  * @param qoe 
  * @return Codec 
  */
-Codec			qoe_get_video_codec					(QoE* qoe);
+Codec			qoe_get_video_codec					(StreamConfig* qoe);
 
 
 /**
@@ -64,7 +64,7 @@ Codec			qoe_get_video_codec					(QoE* qoe);
  * @param qoe 
  * @return gint 
  */
-gint			qoe_get_screen_height				(QoE* qoe);
+gint			qoe_get_screen_height				(StreamConfig* qoe);
 
 
 
@@ -74,7 +74,7 @@ gint			qoe_get_screen_height				(QoE* qoe);
  * @param qoe 
  * @return gint 
  */
-gint			qoe_get_screen_width				(QoE* qoe);
+gint			qoe_get_screen_width				(StreamConfig* qoe);
 
 
 

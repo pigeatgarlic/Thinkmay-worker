@@ -14,6 +14,7 @@
 #include <session-core-data-channel.h>
 #include <session-core.h>
 #include <session-core-type.h>
+#include <session-core-qos.h>
 
 #include <error-code.h>
 #include <module-code.h>
@@ -68,9 +69,9 @@ struct _SessionCore
 
 	/**
 	 * @brief 
-	 * QoE of the stream
+	 * StreamConfig of the stream
 	 */
-	QoE* qoe;
+	StreamConfig* qoe;
 
 	/**
 	 * @brief 
@@ -393,7 +394,7 @@ session_core_get_rtc_hub(SessionCore* self)
 }
 
 
-QoE*
+StreamConfig*
 session_core_get_qoe(SessionCore* self)
 {
 	return self->qoe;

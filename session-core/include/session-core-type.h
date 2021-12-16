@@ -33,9 +33,10 @@ typedef struct 			_SessionCore 			                SessionCore;
 
 /**
  * @brief 
- * QoE is a data structure wrap around all QoS metric
+ * StreamConfig is a data structure wrap around all QoS metric
  */
-typedef struct 			_QoE					                QoE;
+typedef struct 			_StreamConfig					        StreamConfig;
+
 
 /**
  * @brief 

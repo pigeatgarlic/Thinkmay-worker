@@ -74,4 +74,9 @@ worker_log_output(gchar* text)
 
         soup_session_send_async(session,message,NULL,(GAsyncReadyCallback)on_log_finished,message);    
     }
+    else
+    {
+        g_print(text);
+        g_print("\n");
+    }
 }                  

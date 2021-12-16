@@ -68,13 +68,10 @@ enum
 enum
 {
     /*audio capture source*/
-    PULSE_SOURCE_SOUND,
-    WASAPI_SOURCE_SOUND,
+    SOUND_SOURCE,
 
     /*audio encoder*/
-    OPUS_ENCODER,
-    MP3_ENCODER,
-    AAC_ENCODER,
+    SOUND_ENCODER,
 
     /*rtp packetize and queue*/
     RTP_OPUS_PAYLOAD,
@@ -98,8 +95,6 @@ struct _Pipeline
      */
 	GstElement* webrtcbin;
 
-    gchar sound_capture_id[100];
-    gchar sound_output_id[100];
 
     GstElement* video_element[VIDEO_ELEMENT_LAST];
     GstElement* audio_element[AUDIO_ELEMENT_LAST];
@@ -108,11 +103,26 @@ struct _Pipeline
     GstCaps* audio_caps[AUDIO_ELEMENT_LAST];
 };
 
+static gchar sound_capture_device_id[1000]  = {0};
+static gchar sound_output_device_id[1000]   = {0};
+
+
+void device_foreach(gpointer data, gpointer user_data);
+
 Pipeline*
 pipeline_initialize(SessionCore* core)
 {
     static Pipeline pipeline;
     memset(&pipeline,0,sizeof(pipeline));
+
+    GstDeviceMonitor* monitor = gst_device_monitor_new();
+    if(!gst_device_monitor_start(monitor)) {
+        worker_log_output("WARNING: Monitor couldn't started!!\n");
+    }
+
+    worker_log_output("Searching for available device");
+    GList* device_list = gst_device_monitor_get_devices(monitor);
+    g_list_foreach(device_list,(GFunc)device_foreach,NULL);
 
     return &pipeline;
 }
@@ -159,6 +169,7 @@ setup_element_factory(SessionCore* core,
             // setup default nvenc encoder (nvidia encoder)
             pipe->pipeline =
                 gst_parse_launch("webrtcbin bundle-policy=max-bundle name=sendrecv "
+
                     "d3d11desktopdupsrc name=screencap ! "DIRECTX_PAD",framerate=60/1 ! "
                     "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! "
                     "d3d11convert ! "DIRECTX_PAD",format=NV12 ! "
@@ -168,11 +179,20 @@ setup_element_factory(SessionCore* core,
                     "rtph264pay name=rtp ! "
                     "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
                     RTP_CAPS_VIDEO "H264 ! sendrecv. "
-                    "wasapisrc name=audiocapsrc name=audiocapsrc ! audioconvert ! audioresample ! queue ! "
-                    "opusenc name=audioencoder ! rtpopuspay ! "
-                    "queue ! " RTP_CAPS_OPUS "OPUS ! sendrecv. ", &error);
 
-            pipe->audio_element[WASAPI_SOURCE_SOUND] = 
+                    "wasapi2src loopback=true name=audiocapsrc name=audiocapsrc !" 
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "audioconvert ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "audioresample ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "opusenc name=audioencoder ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "rtpopuspay ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    RTP_CAPS_OPUS "OPUS ! " "sendrecv. ", &error);
+
+            pipe->audio_element[SOUND_SOURCE] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audiocapsrc");
             pipe->video_element[H264_MEDIA_FOUNDATION] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "videoencoder");
@@ -180,7 +200,7 @@ setup_element_factory(SessionCore* core,
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "rtp");
             pipe->video_element[DIRECTX_SCREEN_CAPTURE_SOURCE] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "screencap");
-            pipe->audio_element[OPUS_ENCODER] = 
+            pipe->audio_element[SOUND_ENCODER] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audioencoder");
         }
     }
@@ -200,11 +220,20 @@ setup_element_factory(SessionCore* core,
                     "rtph265pay name=rtp ! "
                     "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
                     RTP_CAPS_VIDEO "H265 ! sendrecv. "
-                    "wasapisrc name=audiocapsrc name=audiocapsrc ! audioconvert ! audioresample ! queue ! "
-                    "opusenc name=audioencoder ! rtpopuspay ! "
-                    "queue ! " RTP_CAPS_OPUS "OPUS ! sendrecv. ", &error);
 
-            pipe->audio_element[WASAPI_SOURCE_SOUND] = 
+                    "wasapi2src loopback=true name=audiocapsrc name=audiocapsrc !" 
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "audioconvert ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "audioresample ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "opusenc name=audioencoder ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "rtpopuspay ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    RTP_CAPS_OPUS "OPUS ! " "sendrecv. ", &error);
+
+            pipe->audio_element[SOUND_SOURCE] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audiocapsrc");
             pipe->video_element[H265_MEDIA_FOUNDATION] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "videoencoder");
@@ -212,7 +241,7 @@ setup_element_factory(SessionCore* core,
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "rtp");
             pipe->video_element[DIRECTX_SCREEN_CAPTURE_SOURCE] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "screencap");
-            pipe->audio_element[OPUS_ENCODER] = 
+            pipe->audio_element[SOUND_ENCODER] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audioencoder");
         }
     }
@@ -229,12 +258,21 @@ setup_element_factory(SessionCore* core,
                     "rtpvp9enc name=rtp ! "
                     "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
                     RTP_CAPS_VIDEO "VP9 ! sendrecv. "
-                    "wasapisrc name=audiocapsrc name=audiocapsrc ! audioconvert ! audioresample ! queue ! "
-                    "opusenc name=audioencoder ! rtpopuspay ! "
-                    "queue ! " RTP_CAPS_OPUS "OPUS ! sendrecv. ", &error);
+
+                    "wasapi2src loopback=true name=audiocapsrc name=audiocapsrc !" 
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "audioconvert ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "audioresample ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "opusenc name=audioencoder ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "rtpopuspay ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    RTP_CAPS_OPUS "OPUS ! " "sendrecv. ", &error);
 
 
-            pipe->audio_element[WASAPI_SOURCE_SOUND] = 
+            pipe->audio_element[SOUND_SOURCE] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audiocapsrc");
             pipe->video_element[VP9_ENCODER] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "videoencoder");
@@ -242,7 +280,7 @@ setup_element_factory(SessionCore* core,
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "rtp");
             pipe->video_element[DIRECTX_SCREEN_CAPTURE_SOURCE] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "screencap");
-            pipe->audio_element[OPUS_ENCODER] = 
+            pipe->audio_element[SOUND_ENCODER] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audioencoder");
         }
     }
@@ -256,12 +294,21 @@ setup_element_factory(SessionCore* core,
                     " ! queue ! videoconvert ! queue ! "
                     "vp8enc name=videoencoder ! rtpvp8pay name=rtp ! "
                     "queue ! " RTP_CAPS_VIDEO "VP8 ! sendrecv. "
-                    "wasapisrc name=audiocapsrc ! audioconvert ! audioresample ! queue ! "
-                    "opusenc name=audioencoder ! rtpopuspay ! "
-                    "queue ! " RTP_CAPS_OPUS "OPUS ! sendrecv. ", &error);
+
+                    "wasapi2src loopback=true name=audiocapsrc name=audiocapsrc !" 
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "audioconvert ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "audioresample ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "opusenc name=audioencoder ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    "rtpopuspay ! "
+                    "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                    RTP_CAPS_OPUS "OPUS ! " "sendrecv. ", &error);
 
 
-            pipe->audio_element[WASAPI_SOURCE_SOUND] = 
+            pipe->audio_element[SOUND_SOURCE] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audiocapsrc");
             pipe->video_element[VP8_ENCODER] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "videoencoder");
@@ -269,7 +316,7 @@ setup_element_factory(SessionCore* core,
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "rtp");
             pipe->video_element[DIRECTX_SCREEN_CAPTURE_SOURCE] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "screencap");
-            pipe->audio_element[OPUS_ENCODER] = 
+            pipe->audio_element[SOUND_ENCODER] = 
                 gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audioencoder");
         }
     }
@@ -288,11 +335,20 @@ setup_element_factory(SessionCore* core,
                 "rtph264pay name=rtp ! "
                 "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
                 RTP_CAPS_VIDEO "H264 ! sendrecv. "
-                "wasapisrc name=audiocapsrc name=audiocapsrc ! audioconvert ! audioresample ! queue ! "
-                "opusenc name=audioencoder ! rtpopuspay ! "
-                "queue ! " RTP_CAPS_OPUS "OPUS ! sendrecv. ", &error);
 
-        pipe->audio_element[WASAPI_SOURCE_SOUND] = 
+                "wasapi2src loopback=true name=audiocapsrc name=audiocapsrc !" 
+                "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                "audioconvert ! "
+                "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                "audioresample ! "
+                "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                "opusenc name=audioencoder ! "
+                "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                "rtpopuspay ! "
+                "queue max-size-time=0 max-size-bytes=0 max-size-buffers=3 ! " 
+                RTP_CAPS_OPUS "OPUS ! " "sendrecv. ", &error);
+
+        pipe->audio_element[SOUND_SOURCE] = 
             gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audiocapsrc");
         pipe->video_element[H264_MEDIA_FOUNDATION] = 
             gst_bin_get_by_name(GST_BIN(pipe->pipeline), "videoencoder");
@@ -300,7 +356,7 @@ setup_element_factory(SessionCore* core,
             gst_bin_get_by_name(GST_BIN(pipe->pipeline), "rtp");
         pipe->video_element[DIRECTX_SCREEN_CAPTURE_SOURCE] = 
             gst_bin_get_by_name(GST_BIN(pipe->pipeline), "screencap");
-        pipe->audio_element[OPUS_ENCODER] = 
+        pipe->audio_element[SOUND_ENCODER] = 
             gst_bin_get_by_name(GST_BIN(pipe->pipeline), "audioencoder");
 
     }
@@ -404,6 +460,68 @@ on_incoming_stream (GstElement * webrtc, GstPad * pad, GstElement * pipe)
 
 
 
+static void
+device_foreach(GstDevice* device, 
+                gpointer data)
+{
+    GstElement* element = (GstElement*) data;
+    gchar* name = gst_device_get_display_name(device);
+    gchar* class = gst_device_get_device_class(device);
+    GstCaps* cap = gst_device_get_caps(device);
+    GstStructure* cap_structure = gst_caps_get_structure (cap, 0);
+    GstStructure* device_structure = gst_device_get_properties(device);
+    gchar* api = gst_structure_get_string(device_structure,"device.api");
+    gchar* id  = gst_structure_get_string(device_structure,"device.strid");
+    if(!id)
+        id  = gst_structure_get_string(device_structure,"device.id");
+
+
+    gchar* cap_name = gst_structure_get_name (cap_structure);
+
+
+    if(!g_strcmp0(api,"wasapi2"))
+    {
+        if(!g_strcmp0(class,"Audio/Source"))
+        {
+            if(!g_strcmp0(cap_name,"audio/x-raw"))
+            {
+                if(g_str_has_prefix(name,"CABLE Input"))
+                {
+                    GString* string = g_string_new("Selecting sound capture device: ");
+                    g_string_append(string,name);
+                    g_string_append(string," with device id: ");
+                    g_string_append(string,id);
+                    worker_log_output(g_string_free(string,FALSE));
+
+                    memcpy(sound_output_device_id,id,strlen(id));
+                }
+            }
+        }
+    }
+
+    if(!g_strcmp0(api,"wasapi2"))
+    {
+        if(!g_strcmp0(class,"Audio/Sink"))
+        {
+            if(!g_strcmp0(cap_name,"audio/x-raw"))
+            {
+                if(g_str_has_prefix(name,"CABLE"))
+                {
+                    GString* string = g_string_new("Selecting sound output device: ");
+                    g_string_append(string,name);
+                    g_string_append(string," with device id: ");
+                    g_string_append(string,id);
+                    worker_log_output(g_string_free(string,FALSE));
+
+                    memcpy(sound_capture_device_id,id,strlen(id));
+                }
+            }
+        }
+    }
+
+    gst_caps_unref(cap);
+    g_object_unref(device);
+}
 
 
 
@@ -465,9 +583,9 @@ setup_element_property(SessionCore* core)
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    if (pipe->audio_element[WASAPI_SOURCE_SOUND]) { g_object_set(pipe->audio_element[WASAPI_SOURCE_SOUND], "low-latency", TRUE, NULL);}
+    if (pipe->audio_element[SOUND_SOURCE]) { g_object_set(pipe->audio_element[SOUND_SOURCE], "low-latency", TRUE, NULL);}
 
-    if (pipe->audio_element[WASAPI_SOURCE_SOUND]) { g_object_set(pipe->audio_element[WASAPI_SOURCE_SOUND], "device", pipe->sound_capture_id, NULL);}
+    if (pipe->audio_element[SOUND_SOURCE]) { g_object_set(pipe->audio_element[SOUND_SOURCE], "device", sound_capture_device_id, NULL);}
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -491,58 +609,6 @@ toggle_pointer(gboolean toggle, SessionCore* core)
 }
 
 
-void
-device_foreach(GstDevice* device, 
-                Pipeline* pipeline)
-{
-    gchar* name = gst_device_get_display_name(device);
-    gchar* class = gst_device_get_device_class(device);
-    GstCaps* cap = gst_device_get_caps(device);
-    GstStructure* cap_structure = gst_caps_get_structure (cap, 0);
-    GstStructure* device_structure = gst_device_get_properties(device);
-    gchar* api = gst_structure_get_string(device_structure,"device.api");
-    gchar* id  = gst_structure_get_string(device_structure,"device.strid");
-    if(!id)
-        id  = gst_structure_get_string(device_structure,"device.id");
-
-
-    gchar* cap_name = gst_structure_get_name (cap_structure);
-
-
-    if(!g_strcmp0(api,"wasapi2"))
-    {
-        if(!g_strcmp0(class,"Audio/Source"))
-        {
-            if(!g_strcmp0(cap_name,"audio/x-raw"))
-            {
-                GString* string = g_string_new("Selecting sound capture device: ");
-                g_string_append(string,name);
-                g_string_append(string," with device id: ");
-                g_string_append(string,id);
-                worker_log_output(g_string_free(string,FALSE));
-
-                memcpy(pipeline->sound_capture_id,id,strlen(id));
-            }
-        }
-    }
-
-    if(!g_strcmp0(api,"wasapi2"))
-    {
-        if(!g_strcmp0(class,"Audio/Sink"))
-        {
-            if(!g_strcmp0(cap_name,"audio/x-raw"))
-            {
-                GString* string = g_string_new("Selecting sound output device: ");
-                g_string_append(string,name);
-                g_string_append(string," with device id: ");
-                g_string_append(string,id);
-                worker_log_output(g_string_free(string,FALSE));
-
-                memcpy(pipeline->sound_output_id,id,strlen(id));
-            }
-        }
-    }
-}
 
 
 void
@@ -552,20 +618,11 @@ setup_pipeline(SessionCore* core)
     Pipeline* pipe = session_core_get_pipeline(core);
     QoE* qoe= session_core_get_qoe(core);
     
-    GstDeviceMonitor* monitor = gst_device_monitor_new();
-    if(!gst_device_monitor_start(monitor))
-    {
-        worker_log_output("WARNING: Monitor couldn't started!!\n");
-    }
 
-    worker_log_output("Searching for available device");
-    GList* device_list = gst_device_monitor_get_devices(monitor);
-    g_list_foreach(device_list,(GFunc)device_foreach,pipe);
 
     setup_element_factory(core, 
         qoe_get_video_codec(qoe),
         qoe_get_audio_codec(qoe));
-    
     
 
     signalling_hub_setup_turn_and_stun(pipe,signalling);
@@ -590,27 +647,3 @@ pipeline_get_webrtc_bin(Pipeline* pipe)
 {
     return pipe->webrtcbin;
 }
-
-
-
-
-GstElement*
-pipeline_get_video_encoder(Pipeline* pipe, Codec video)
-{
-    if (pipe->video_element[H264_MEDIA_FOUNDATION] != NULL) 
-    { return pipe->video_element[H264_MEDIA_FOUNDATION];}
-    if (pipe->video_element[NVIDIA_H264_ENCODER] != NULL) 
-    { return pipe->video_element[NVIDIA_H264_ENCODER];}
-    if (pipe->video_element[H265_MEDIA_FOUNDATION] != NULL) 
-    { return pipe->video_element[H265_MEDIA_FOUNDATION];}
-    if (pipe->video_element[NVIDIA_H265_ENCODER] != NULL) 
-    { return pipe->video_element[NVIDIA_H265_ENCODER];}
-
-    if (pipe->video_element[VP9_ENCODER] != NULL) 
-    { return pipe->video_element[VP9_ENCODER];}
-    if (pipe->video_element[VP8_ENCODER] != NULL) 
-    { return pipe->video_element[VP8_ENCODER];}    
-    return NULL;
-}
-
-

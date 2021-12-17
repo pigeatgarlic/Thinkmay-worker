@@ -63,7 +63,7 @@ handler_session_core_state_function(ChildProcess* proc,
                                     AgentServer* agent)
 {
     RemoteSession* session = agent_get_remote_session(agent);
-    send_message_to_cluster(agent,"core/end",NULL);
+    send_message_to_cluster(agent,"/core/end",NULL);
 }
 
 

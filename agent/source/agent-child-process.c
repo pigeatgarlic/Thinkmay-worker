@@ -94,18 +94,22 @@ read_std_pipe_async(ChildProcess* proc,
                     HANDLE pipe, 
                     ChildStdErrHandle handle)
 {
-    DWORD dwWritten = 0;
-    gchar buffer_stdout[1000] = {0};
-    memset(buffer_stdout, 0, 1000);
-    OVERLAPPED overlap;
-    overlap.Offset = 0;
-    overlap.OffsetHigh = 0;
-    ReadFile(pipe, buffer_stdout, 1000, &dwWritten,NULL);
-    if(dwWritten && *buffer_stdout) {
-        GBytes* byte = g_bytes_new(buffer_stdout, strlen(buffer_stdout));
-        handle(byte, proc->agent, proc->data);
+    while(TRUE)
+    {
+        DWORD dwWritten = 0;
+        gchar buffer_stdout[1000] = {0};
+        memset(buffer_stdout, 0, 1000);
+        OVERLAPPED overlap;
+        overlap.Offset = 0;
+        overlap.OffsetHigh = 0;
+        ReadFile(pipe, buffer_stdout, 1000, &dwWritten,NULL);
+        if(dwWritten && *buffer_stdout) {
+            GBytes* byte = g_bytes_new(buffer_stdout, strlen(buffer_stdout));
+            handle(byte, proc->agent, proc->data);
+            g_bytes_unref(byte);
+        }
+        Sleep(10);
     }
-    read_std_pipe_async(proc,pipe,handle);
 }
 void
 read_stdout_task(GTask* task,
@@ -139,10 +143,10 @@ handle_child_process_state(gpointer data)
     ChildProcess* proc = (ChildProcess*)data;
     GCancellable* cancellabl = g_cancellable_new();
 
-    GTask* taskout = g_task_new(proc, cancellabl, NULL, NULL);
+    GTask* taskout = g_task_new(NULL, cancellabl, NULL, NULL);
     g_task_set_task_data(taskout, proc, NULL);
     g_task_run_in_thread(taskout, (GTaskThreadFunc) read_stdout_task);
-    GTask* taskerr = g_task_new(proc, cancellabl, NULL, NULL);
+    GTask* taskerr = g_task_new(NULL, cancellabl, NULL, NULL);
     g_task_set_task_data(taskerr, proc, NULL);
     g_task_run_in_thread(taskerr, (GTaskThreadFunc)read_stderr_task);
 

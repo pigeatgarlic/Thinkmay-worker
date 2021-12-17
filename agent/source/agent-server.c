@@ -85,6 +85,10 @@ server_callback (SoupServer        *server,
 		soup_message_set_status(msg,SOUP_STATUS_OK);
 		return;
 	}
+	else if(!g_strcmp0(uri->path,"/cluster/Shell")) {
+		initialize_shell_session(agent,msg);
+		return;
+	}
 
 	soup_message_headers_iter_init (&iter, msg->request_headers);
 	while (soup_message_headers_iter_next (&iter, &name, &value))
@@ -111,9 +115,6 @@ server_callback (SoupServer        *server,
 	}
 	else if(!g_strcmp0(uri->path,"/cluster/Terminate")) {
 		msg->status_code = session_terminate(agent)? SOUP_STATUS_OK : SOUP_STATUS_BAD_REQUEST;
-	}
-	else if(!g_strcmp0(uri->path,"/cluster/Shell")) {
-		initialize_shell_session(agent,msg);
 	}
 }
 

@@ -56,18 +56,23 @@ send_message_to_cluster(AgentServer* object,
 {
     Socket* socket = agent_get_socket(object);
     GString* messsage_url = g_string_new(socket->cluster_url);
+    g_string_append(messsage_url,endpoint);
+    gchar* url = g_string_free(messsage_url,FALSE);
 
-    if(endpoint)
-        g_string_append(messsage_url,endpoint);
-    
-    SoupMessage* soupMessage = soup_message_new(SOUP_METHOD_POST,g_string_free(messsage_url,FALSE));
+    SoupMessage* soupMessage = soup_message_new(SOUP_METHOD_POST,url);
     soup_message_headers_append(soupMessage->request_headers,"Authorization",DEVICE_TOKEN);
 
     if(message)
+    {
         soup_message_set_request(soupMessage,"application/json",SOUP_MEMORY_COPY,
             message,strlen(message));
+    }
+    else
+    {
+        soup_message_set_request(soupMessage,"application/json",SOUP_MEMORY_COPY,"",0);
+    }
 
-    soup_session_send_async(socket->session,soupMessage,NULL,NULL,NULL);
+    soup_session_send_message(socket->session,soupMessage);
 }
 
 

@@ -47,7 +47,6 @@ main(int argc, char* argv[])
     GOptionContext *context;
     GError *error = NULL;
 
-
     context = g_option_context_new ("- thinkmay agent ");
     g_option_context_add_main_entries (context, entries, NULL);
     g_option_context_add_group (context, gst_init_get_option_group ());
@@ -61,7 +60,7 @@ main(int argc, char* argv[])
             SOUP_SESSION_SSL_STRICT, FALSE,
             SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
             SOUP_SESSION_HTTPS_ALIASES, http_aliases, NULL);
-    
+
     if(!strlen(USER))
     {
         g_print("Enter your thinkmay manager username:\n[USERNAME]: ");
@@ -77,6 +76,7 @@ main(int argc, char* argv[])
         g_print("thinkmay cluster manager ip:\n[IP ADDRESS]: ");
         scanf("%s", CLUSTER_IP);
     }
+
 
     JsonObject* login = json_object_new();
     json_object_set_string_member(login,"UserName",USER);

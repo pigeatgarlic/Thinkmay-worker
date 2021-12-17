@@ -13,10 +13,9 @@
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-#define SESSION_CORE_BINARY           "session-core"
+#define SESSION_CORE_BINARY           "./session-core.exe"
 #define AGENT_BINARY                  "./agent.exe"
 #define REMOTE_APP_BINARY             "./remote-app.exe"
-#define POWERSHELL_BINARY             "cmd"
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif

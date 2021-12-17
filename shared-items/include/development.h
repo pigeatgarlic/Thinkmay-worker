@@ -13,7 +13,7 @@
 
 
 
-#define DEVELOPMENT_ENVIRONMENT                 TRUE
+#define DEVELOPMENT_ENVIRONMENT                 FALSE
 #define DEFAULT_CLIENT_TOKEN                    "TestingClientModuleToken"
 #define DEFAULT_CORE_TOKEN                      "TestingCoreModuleToken"
 

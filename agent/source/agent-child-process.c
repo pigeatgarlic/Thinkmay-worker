@@ -89,47 +89,6 @@ handle_child_process_stderr(GInputStream* stream,
 
 
 
-void
-read_std_pipe_async(ChildProcess* proc, 
-                    HANDLE pipe, 
-                    ChildStdErrHandle handle)
-{
-    while(TRUE)
-    {
-        DWORD dwWritten = 0;
-        gchar buffer_stdout[1000] = {0};
-        memset(buffer_stdout, 0, 1000);
-        OVERLAPPED overlap;
-        overlap.Offset = 0;
-        overlap.OffsetHigh = 0;
-        ReadFile(pipe, buffer_stdout, 1000, &dwWritten,NULL);
-        if(dwWritten && *buffer_stdout) {
-            GBytes* byte = g_bytes_new(buffer_stdout, strlen(buffer_stdout));
-            handle(byte, proc->agent, proc->data);
-            g_bytes_unref(byte);
-        }
-        Sleep(10);
-    }
-}
-void
-read_stdout_task(GTask* task,
-            gpointer source,
-            gpointer task_data,
-            GCancellable* cancellable)
-{
-    ChildProcess* proc = g_task_get_task_data(task);
-    read_std_pipe_async(proc, proc->process_stdout, proc->stdout_handler);
-}
-
-void
-read_stderr_task(GTask* task,
-                gpointer source,
-                gpointer task_data,
-                GCancellable* cancellable)
-{
-    ChildProcess* proc = g_task_get_task_data(task);
-    read_std_pipe_async(proc, proc->process_stderr, proc->stderr_handler);
-}
 
 
 #endif
@@ -142,14 +101,6 @@ handle_child_process_state(gpointer data)
 {
     ChildProcess* proc = (ChildProcess*)data;
     GCancellable* cancellabl = g_cancellable_new();
-
-    GTask* taskout = g_task_new(NULL, cancellabl, NULL, NULL);
-    g_task_set_task_data(taskout, proc, NULL);
-    g_task_run_in_thread(taskout, (GTaskThreadFunc) read_stdout_task);
-    GTask* taskerr = g_task_new(NULL, cancellabl, NULL, NULL);
-    g_task_set_task_data(taskerr, proc, NULL);
-    g_task_run_in_thread(taskerr, (GTaskThreadFunc)read_stderr_task);
-
     while (TRUE)
     {
 #ifndef G_OS_WIN32
@@ -201,40 +152,6 @@ childprocess_force_exit(ChildProcess* proc)
     TerminateProcess(proc->process, 1);
 }
 
-#ifdef G_OS_WIN32
-
-typedef struct _ChildPipe
-{
-    HANDLE standard_out;
-    HANDLE standard_err;
-}ChildPipe;
-
-static ChildPipe*
-initialize_process_handle(ChildProcess* self,
-                          AgentServer* agent)
-{
-    ChildPipe* ret = malloc(sizeof(ChildPipe));
-
-    SECURITY_ATTRIBUTES attr;
-    attr.nLength = sizeof(SECURITY_ATTRIBUTES);
-    attr.bInheritHandle = TRUE;
-    attr.lpSecurityDescriptor = NULL;
-
-    if (!CreatePipe(&self->process_stdout, &ret->standard_out, &attr, 500))
-        return NULL;
-    if (!CreatePipe(&self->process_stderr, &ret->standard_err, &attr, 500))
-        return NULL;
-
-    gchar i = "/xcc";
-    SetHandleInformation(self->process_stderr, HANDLE_FLAG_INHERIT, 0);
-    SetHandleInformation(self->process_stdout, HANDLE_FLAG_INHERIT, 0);
-    return ret;
-}
-#endif
-
-
-
-
 ChildProcess*
 create_new_child_process(gchar* process_name,
                         ChildStdErrHandle stderrhdl,
@@ -261,9 +178,6 @@ create_new_child_process(gchar* process_name,
 #else
 
 
-    ChildPipe* hdl = initialize_process_handle(child_process,agent);
-    if(!hdl){ return NULL; }
-
     PROCESS_INFORMATION pi;
     ZeroMemory(&pi, sizeof(pi));
 
@@ -272,9 +186,8 @@ create_new_child_process(gchar* process_name,
     ZeroMemory(&startup_infor, sizeof(startup_infor));
     startup_infor.cb = sizeof(STARTUPINFO);
     startup_infor.dwFlags |= STARTF_USESTDHANDLES;
-    startup_infor.hStdOutput = hdl->standard_out;
-    startup_infor.hStdError = hdl->standard_err;
-    free(hdl);
+    startup_infor.hStdOutput = NULL;
+    startup_infor.hStdError = NULL;
 
     /*START process, all standard input and output are controlled by agent*/
     gboolean result = CreateProcess(NULL,
@@ -288,7 +201,10 @@ create_new_child_process(gchar* process_name,
         &startup_infor, &pi);
 
     if(!result)
+    {
+        worker_log_output("Fail to create child process");
         return NULL;        
+    }
     else    
         child_process->process = pi.hProcess;
 #endif

@@ -158,9 +158,10 @@ session_initialize(AgentServer* agent)
     g_string_append(core_script,DEVICE_TOKEN);
     g_string_append(core_script," --clusterip=");
     g_string_append(core_script,CLUSTER_IP);
+    gchar* process_path = g_string_free(core_script,FALSE);
 
     session->process =
-    create_new_child_process(g_string_free(core_script,FALSE),
+    create_new_child_process(process_path,
         (ChildStdErrHandle)handle_session_core_error,
         (ChildStdOutHandle)handle_session_core_output,
         (ChildStateHandle)handler_session_core_state_function, agent,NULL);

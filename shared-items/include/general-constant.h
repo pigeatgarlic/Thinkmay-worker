@@ -13,9 +13,9 @@
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-#define SESSION_CORE_BINARY           "./session-core.exe"
-#define AGENT_BINARY                  "./agent.exe"
-#define REMOTE_APP_BINARY             "./remote-app.exe"
+#define SESSION_CORE_BINARY           "session-core.exe"
+#define AGENT_BINARY                  "agent.exe"
+#define REMOTE_APP_BINARY             "remote-app.exe"
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif
